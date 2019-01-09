@@ -1,0 +1,1761 @@
+
+AVRASM ver. 2.1.12  C:\FPC\Lesson002_AVR\Lesson002_AVR_ASM.asm Sun Feb 03 20:12:09 2013
+
+C:\FPC\Lesson002_AVR\Lesson002_AVR_ASM.asm(50): Including file 'C:\Program Files\Atmel\AVR Tools\AvrAssembler2\Appnotes\m8def.inc'
+C:\FPC\Lesson002_AVR\Lesson002_AVR_ASM.asm(115): warning: Register r26 already defined by the .DEF directive
+C:\FPC\Lesson002_AVR\Lesson002_AVR_ASM.asm(118): Including file 'C:\FPC\Lesson002_AVR\DSEG.inc'
+C:\FPC\Lesson002_AVR\Lesson002_AVR_ASM.asm(119): Including file 'C:\FPC\Lesson002_AVR\EEPROM.inc'
+C:\FPC\Lesson002_AVR\Lesson002_AVR_ASM.asm(120): Including file 'C:\FPC\Lesson002_AVR\RESET.inc'
+C:\FPC\Lesson002_AVR\Lesson002_AVR_ASM.asm(121): Including file 'C:\FPC\Lesson002_AVR\EXT_INT.inc'
+C:\FPC\Lesson002_AVR\Lesson002_AVR_ASM.asm(122): Including file 'C:\FPC\Lesson002_AVR\TIM0.inc'
+C:\FPC\Lesson002_AVR\Lesson002_AVR_ASM.asm(123): Including file 'C:\FPC\Lesson002_AVR\ANA_COMP.inc'
+C:\FPC\Lesson002_AVR\Lesson002_AVR_ASM.asm(124): Including file 'C:\FPC\Lesson002_AVR\Delay.inc'
+C:\FPC\Lesson002_AVR\Lesson002_AVR_ASM.asm(125): Including file 'C:\FPC\Lesson002_AVR\SubRouters.inc'
+C:\FPC\Lesson002_AVR\Lesson002_AVR_ASM.asm(128): Including file 'C:\FPC\Lesson002_AVR\Lesson001_IO.inc'
+C:\FPC\Lesson002_AVR\Lesson002_AVR_ASM.asm(129): Including file 'C:\FPC\Lesson002_AVR\Lesson002_AnaComp.inc'
+                 
+                 
+                 ;** Компьютерный центр FLASH
+                 ;** Компьютерная грамота в Харцызске
+                 ;** г. Харцызск, пер. Шмидта, 2
+                 ;**
+                 ;**(здание ООО "Данко" - бывшая книжная база, рядом ГорГАИ, ОШ №7, "Танк")
+                 ;**
+                 ;** Менеджер по работе с клиентами Павел
+                 ;**
+                 ;** mob: 095-725-20-14
+                 ;**
+                 ;** mob: 099-490-69-45
+                 ;**
+                 ;** mail: info@imkoteh.com
+                 ;**************************************
+                 ;**************************************
+                 ;**	Интернет-магазин "ИМКОТЕХ"
+                 ;** Компьютерная техника в Харцызске
+                 ;** г. Харцызск, пер. Шмидта, 2
+                 ;**
+                 ;**(здание ООО "Данко" - бывшая книжная база, рядом ГорГАИ, ОШ №7, "Танк")
+                 ;**
+                 ;** Менеджер по работе с клиентами Александр
+                 ;**
+                 ;** mob: 066-817-76-78
+                 ;**
+                 ;** mob: 050-044-79-69
+                 ;**
+                 ;** icq: 419-543-015
+                 ;**
+                 ;** mail: info@imkoteh.com
+                 ;**************************************
+                 
+                 
+                 ;**************************************
+                 ;**	Test Programm Version 001
+                 ;**	12 Jan 2013
+                 ;** Test List for Study
+                 ;**	Mega8	1MHz
+                 ;** Blackveolet
+                 ;** Ukraine, Donetsk region, Khartsyzsk
+                 ;** blackveolet@mail.ru
+                 ;**************************************
+                 
+                 ;**************************************
+                 ; Lesson 001 IO system
+                 ;**************************************
+                 .list
+                 ; Директива DEVICE позволяет указать для какого устройства компилируется программа.
+                 ; При использовании данной директивы компилятор выдаст предупреждение, если будет 
+                 ; найдена инструкция, которую не поддерживает данный микроконтроллер. Также будет выдано
+                 ; предупреждение, если программный сегмент, либо сегмент EEPROM превысят размер допускаемый устройством. 
+                 ; Если же директива не используется то все инструкции считаются допустимыми, и отсутствуют ограничения на размер сегментов.
+                 .device ATmega8
+                 
+                 
+                 ; описание вектора прерываний
+                 
+                 ; выбор сегмента памяти программ
+                 .cseg
+                 ; Reset Handler
+000000 c038      .org 0x000 rjmp RESET ; Reset Handler
+                 ; IRQ0 Handler
+000001 9518      .org 0x001 reti;rjmp EXT_INT0 ; IRQ0 Handler
+                 ; IRQ1 Handler
+000002 9518      .org 0x002 reti;rjmp EXT_INT1 ; IRQ1 Handler
+                 ; Timer2 Compare Handler
+000003 9518      .org 0x003 reti;rjmp TIM2_COMP ; Timer2 Compare Handler
+                 ; Timer2 Overflow Handler
+000004 9518      .org 0x004 reti;rjmp TIM2_OVF ; Timer2 Overflow Handler
+                 ; Timer1 Capture Handler
+000005 9518      .org 0x005 reti;rjmp TIM1_CAPT ; Timer1 Capture Handler
+                 ; Timer1 CompareA Handler
+000006 9518      .org 0x006 reti;rjmp TIM1_COMPA ; Timer1 CompareA Handler
+                 ; Timer1 CompareB Handler
+000007 9518      .org 0x007 reti;rjmp TIM1_COMPB ; Timer1 CompareB Handler
+                 ; Timer1 Overflow Handler
+000008 9518      .org 0x008 reti;rjmp TIM1_OVF ; Timer1 Overflow Handler
+                 ; Timer0 Overflow Handler
+000009 9518      .org 0x009 reti;rjmp TIM0_OVF ; Timer0 Overflow Handler
+                 ; SPI Transfer Complete Handler
+00000a 9518      .org 0x00a reti;rjmp SPI_STC ; SPI Transfer Complete Handler
+                 ; USART RX Complete Handler
+00000b 9518      .org 0x00b reti;rjmp USART_RXC ; USART RX Complete Handler
+                 ; UDR Empty Handler
+00000c 9518      .org 0x00c reti;rjmp USART_UDRE ; UDR Empty Handler
+                 ; USART TX Complete Handler
+00000d 9518      .org 0x00d reti;rjmp USART_TXC ; USART TX Complete Handler
+                 ; ADC Conversion Complete Handler
+00000e 9518      .org 0x00e reti;rjmp ADC ; ADC Conversion Complete Handler
+                 ; EEPROM Ready Handler
+00000f 9518      .org 0x00f reti;rjmp EE_RDY ; EEPROM Ready Handler
+                 ; Analog Comparator Handler
+000010 c1fc      .org 0x010 rjmp ANA_COMP ; Analog Comparator Handler
+                 ; Two-wire Serial Interface Handler
+000011 9518      .org 0x011 reti;rjmp TWSI ; Two-wire Serial Interface Handler
+                 ; Store Program Memory Ready Handler
+000012 9518      .org 0x012 reti;rjmp SPM_RDY ; Store Program Memory Ready Handler
+                 
+                 
+                 ;описание всех РОНов
+                 .def tmpL	= r16	;главный рабочий регистр(младший)
+                 .def tmpH	= r17	;главный рабочий регистр(старший)
+                 .def tmpL2	= r18	;вспомогательный рабочий регистр(младший)
+                 .def tmpH2	= r19	;вспомогательный рабочий регистр(старший)
+                 .def tmp1	= r20	;пользовательский 1 регистр
+                 .def tmp2	= r21	;пользовательский 1 регистр
+                 .def tmp3	= r22	;пользовательский 1 регистр
+                 .def DataL	= r23	;регистр данных(младший)
+                 .def DataH	= r24	;регистр данных(старший)
+                 .def cnt1	= r25	;главный счетчик регистр
+                 .def Flags	= r26	;регистр флагов
+                 
+                 // организуем подключение всех файлов проекта
+                 #include"DSEG.inc"		;файл резервирования переменных в ОЗУ и инициализация констант и таблиц
+                 
+                 ;** Файл резервирования переменных в ОЗУ и констант
+                 ;**
+                 ;**
+                 ;************************************
+                 
+                 ;************************************
+                 ;выбор сегмента EEPROM
+                 .eseg
+                 .org	0x10
+                 
+000010           eepromTu:	.BYTE 1
+                 
+                 ;************************************
+                 .dseg
+                 .org 0x060
+                 
+000060           Power:	.BYTE 1
+                 
+000061           dataRx_buf: .BYTE 32;данные на прием
+000081           dataTx_buf: .BYTE 32;данные на передачу
+                 
+0000a1           AD1H: .BYTE 1; сумма значений подсчитанного по каналу АЦП 1 (напряжение)
+0000a2           AD1L: .BYTE 1
+                 
+0000a3           AD3H: .BYTE 1; сумма значений подсчитанных по каналу АЦП 3 (ток)
+0000a4           AD3L: .BYTE 1
+                 
+0000a5           Ul:	.BYTE 1	; младший байт выведенного значения напряжения
+0000a6           Uh:	.BYTE 1	; старший байт выведенного значения напряжения
+0000a7           Il:	.BYTE 1	;
+0000a8           Ih:	.BYTE 1	;
+                 
+0000a9           U2: .BYTE 1; значение по напряжению старшая цифра
+0000aa           U1: .BYTE 1; значение по напряжению
+0000ab           U0: .BYTE 1; значение по напряжению младшая цифра
+                 
+0000ac           I1: .BYTE 1; значение по току старшая цифра
+0000ad           I0: .BYTE 1; значение по току младшая цифра
+                 
+0000ae           stolbik: .BYTE 1; значение для столбика тока
+                 
+0000af           cntI: .BYTE 1; счетчик количество замеров по току
+0000b0           cntU: .BYTE 1; счетчик количества замеров по напряжению
+                 
+0000b1           T1l: .BYTE 1	;младший байт температуры считанной с датчика №1
+0000b2           T1h: .BYTE 1	;
+0000b3           T2l: .BYTE 1	;младший байт температуры считанной с датчика №2
+0000b4           T2h: .BYTE 1	;
+                 
+0000b5           TT2: .BYTE 1; значение температуры старшая цифра
+0000b6           TT1: .BYTE 1; значение температуры
+0000b7           TT0: .BYTE 1; значение температуры младшая цифра
+                 
+0000b8           bufLAN: .BYTE 8	; буфер принятых данных
+                 ;************************************
+                 
+                 
+                 ;************************************
+                 .cseg
+                 ;запишем необходимые константы
+                 .equ END_DATA = '+'
+                 .equ START_DATA = ':'
+                 
+                 //константы предустановок  МК
+                 .equ T0PRE=-5	
+                 .equ T2PRE=-150;-125;2	
+                 
+                 
+                 .equ a = 1		; Bit 0 - a, вес разряда 1
+                 .equ b = 2		; Bit 1 - b, вес разряда 2
+                 .equ c = 4		; Bit 2 - c, вес разряда 4
+                 .equ d = 8		; Bit 3 - d, вес разряда 8
+                 .equ e = 16		; Bit 4 - e, вес разряда 16
+                 .equ f = 32		; Bit 5 - f, вес разряда 32
+                 .equ g = 64		; Bit 6 - g, вес разряда 64
+                 .equ DP = 128	; Bit 7 - DP, вес разряда 128
+                 
+                 .equ Num0 = a+b+c+d+e+f	; цифра 0
+                 .equ Num1 = b+c			; цифра 1
+                 .equ Num2 = a+b+d+e+g	; цифра 2
+                 .equ Num3 = a+b+c+d+g	; цифра 3
+                 .equ Num4 = b+c+f+g		; цифра 4
+                 .equ Num5 = a+c+d+f+g	; цифра 5
+                 .equ Num6 = a+c+d+e+f+g	; цифра 6
+                 .equ Num7 = a+b+c		; цифра 7
+                 .equ Num8 = a+b+c+d+e+f+g	; цифра 8
+                 .equ Num9 = a+b+c+d+f+g; цифра 9
+                 
+                 ;************************************
+                 ; инициализируем необходимые названия для выводов
+                 
+                 ; канал Tx/Rx
+                 .set PortX = PD2
+                 .set KeyTRIAC = PD2
+                 
+                 
+                 ; кнопкa 
+                 .set tempKey1 = PD3
+                 
+                 ;************************************
+                 ;Таблица констант для вывода цифр на семисегментный индикатор
+                 ; 0 1 2 3 4 5 6 7 8 9
+                 TableIndicator:
+000013 063f      .db Num0,Num1	;.db	0b00111111, 0b00000110
+000014 4f5b      .db Num2,Num3	;.db	0b01011011, 0b01001111
+000015 6d66      .db Num4,Num5	;.db	0b01100110, 0b01101101
+000016 077d      .db Num6,Num7	;.db	0b01111101, 0b00000111
+000017 6f7f      .db Num8,Num9	;.db	0b01111111, 0b01101111
+                 
+                 ; Таблица углов открывания для тиристора(задержка)
+                 ; Предделитель Таймера0 выбран = 64
+                 TableTRIAC:
+000018 d7ff      .db 255-(0000/64), 255-(2587/64)
+                  ;полностью открыт ;90 % мощности
+000019 c2cb      .db 255-(3362/64), 255-(3962/64) 
+                 ;80 % мощности	   ;70 % мощности
+00001a b1b9      .db 255-(4494/64), 255-(4999/64) 
+                 ;60 % мощности	   ;50 % мощности
+00001b a1aa      .db 255-(5503/64), 255-(6035/64)
+                 ;40 % мощности	   ;30 % мощности
+00001c 8c98      .db 255-(6636/64), 255-(7410/64) 
+                 ;20 % мощности     ;10 % мощности
+                 
+                 ;************************************
+                 
+                 .cseg			; выбор сегмента памяти программ
+00001d 523a
+00001e 2d53
+00001f 3834
+000020 2b35      dataRX: .db ':','R','S','-','4','8','5','+'
+000021 503a
+000022 2d43
+000023 5641
+000024 2b52      dataTX: .db ':','P','C','-','A','V','R','+'
+                 ; личные позывные каждого микроконтроллера
+                 ; 4 байта ID
+000025 4449
+000026 4b4d
+000027 5042
+000028 4652
+000029 4653      dataID:	.db 'I','D','M','K','B','P','R','F','S','F'
+                 ; воспринимаемы команды
+                 	; запрос на байт из памяти программ
+                 ;dataBP: 
+                 	; запрос на байт из регистрового файла или I/O
+                 ;dataRF: 
+                 	; специальный ответ
+                 ;dataSF: 
+                 #include"EEPROM.inc"	;файл работы с энергонезависимой памятью
+                 
+                 ;** Файл работы с энергонезависимой памятью
+                 ;**
+                 ;**
+                 ;************************************
+                 
+                 ;************************************
+                 ; запись данных в EEPROM
+                 EEPROM_write:
+00002a 99e1      		sbic EECR, EEWE	; ждать завершения предыдущей записи
+00002b cffe      		rjmp EEPROM_write
+00002c bb1f      		out EEARH, tmpH
+00002d bb0e      		out EEARL, tmpL	; занести адресс в регистр адресса
+00002e bb4d      		out EEDR, tmp1	; записать данные в регистр данных
+00002f 9ae2      		sbi EECR, EEMWE	; установить флаг EEMWE
+000030 9ae1      		sbi EECR, EEWE	;начать запись в EEPROM
+000031 9508      		ret
+                 ;************************************
+                 
+                 ;************************************
+                 ;чтение данных из EEPROM
+                 EEPROM_read:
+000032 99e1      		sbic EECR, EEWE	;ждать завершения предыдущей записи
+000033 cffe      		rjmp EEPROM_read
+000034 bb1f      		out EEARH, tmpH
+000035 bb0e      		out EEARL, tmpL
+000036 9ae0      		sbi EECR, EERE	; начать чтение
+000037 b34d      		in tmp1, EEDR	;сохранить данные
+000038 9508      		ret
+                 ;************************************
+                 #include"RESET.inc" 	;файл инициализации(сброса)
+                 
+                 ;**
+                 ;**
+                 ;**
+                 ;************************************
+                 
+                 ; первоначальный сброс
+                 RESET:
+                 ; запрещаем прерывания
+000039 94f8      	cli
+                 ;************************************
+                 ;---откалибруем внутренний генератор
+                 ;		ldi r16, 0x48
+                 ;		sts OSCCAL, r16
+                 ;************************************
+                 
+                 ;************************************
+                 ;	инициализация стека
+00003a e004      		ldi r16,high(RAMEND)	
+00003b bf0e      		out SPH,r16			 	; Set Stack Pointer to top of RAM
+00003c e50f      		ldi r16,low(RAMEND)
+00003d bf0d      		out SPL,r16
+                 ;************************************
+                 
+                 ;************************************
+                 
+                 	;Port Pin Configurations
+                 	;DDxn     PORTxn	PUD (in 
+                 	;					MCUCR2)         I/O        Pull-up     	Comment
+                 	;0 			0 		X 				Input      No        	Tri-state (Hi-Z)
+                 	;0 			1 		0 				Input      Yes			Pxn will source current if ext. pulled low.
+                 	;0 			1 		1 				Input      No        	Tri-state (Hi-Z)
+                 	;1 			0 		X 				Output     No	        Output Low (Sink)
+                 	;1 			1 		X 				Output     No        	Output High (Source)
+                 	
+                 ;-------------------------- Подключение подтягивающих резисторов
+                 ;		lds		r16, SFIOR
+                 ;		ori		r16, 0<<PUD	
+                 ;		out		SFIOR, r16	
+                 ;-------------------------- Инициализация Порта ввода/вывода B
+                 
+00003e e000      		ldi		r16, 0x00	; Записываем число $00 в регистр temp
+00003f bb07      		out		DDRB, r16	; Записываем это число в DDRС
+000040 e000      		ldi		r16, 0x00	; Записываем число $00 в регистр temp
+000041 bb08      		out		PORTB, r16	; Записываем то  же число в PORTС
+                 
+                 ;-------------------------- Инициализация Порта ввода/вывода С
+                 
+000042 e000      		ldi		r16, 0x00	; Записываем число $00 в регистр temp
+000043 bb04      		out		DDRC, r16	; Записываем это число в DDRС
+000044 e000      		ldi		r16, 0x00	; Записываем число $00 в регистр temp
+000045 bb05      		out		PORTC, r16	; Записываем то  же число в PORTС
+                 
+                 ;-------------------------- Инициализация Порта ввода/вывода D
+                 
+000046 e000      		ldi		r16, 0x00	; Записываем число $00 в регистр temp
+000047 bb01      		out		DDRD, r16	; Записываем это число в DDRС
+000048 e000      		ldi		r16, 0x00	; Записываем число $00 в регистр temp
+000049 bb02      		out		PORTD, r16	; Записываем то  же число в PORTС
+                 
+                 ;************************************
+                 
+                 ;************************************
+                 ; разрешим переназначить инвертирующий вход компоратора на другую ногу
+                 ;Регистр ADCSRB
+                 ;Bit 	7	 6 	5 	4 	3	 	2 			1 			0
+                 ;		– ACME	 –	 –	 –	 ADTS2        ADTS1        ADTS0        
+                 ;ldi temp, (1<<ACME)
+                 ;sts ADCSRB, temp 
+                 ; теперь выберем которую ногу задействовать
+                 ; за одно выберем что на ноге REF висит конденсатор
+                 ;Регистр ADMUX
+                 ;Bit 	7		 6			 5 		4 		3 			2 			1 			0
+                 ;	REFS1       REFS0      ADLAR	 –	 MUX3        MUX2        MUX1        MUX0        
+                 ;ldi temp, 0xC7
+                 ;sts ADMUX, temp
+                 
+                 	; Регистр ACSR
+                 	;7		6		5		4		3		2		1		0
+                 	;ACD    ACBG    ACO 	ACI 	ACIE    ACIC    ACIS1   ACIS0  
+                 	;7-ACD: Разрешить (1) запретить(0) компаратор
+                 	;6-ACBG:(1) подключение к неинвертирующему входу компаратора внутреннего ИОН, (0) не подключен
+                 	;5-ACO:Результат сравнения
+                 	;4-ACI:Флаг прерывания
+                 	;3-ACIE:Разрешение прерывания (1)
+                 	;2-ACIC:(1) подключение компаратора к схеме захвата таймера Т1
+                 	;1-ACIS1:условие срабатывания прерывания
+                 	;0-ACIS0:
+                 	;00 любое изменение 
+                 	;10 с 1 на 0
+                 	;11 с 0 на 1
+                 	;ldi temp, (1<<ACD)		; выключение компаратора
+                 ;-------------------------- Инициализация компаратора
+                 ; отключаем аналоговый компаратор для энерго сбережения
+00004a e800      		ldi r16, 0x80		; выключение компаратора
+00004b b908      		out ACSR, r16
+                 
+                 ;		in r16,ACSR
+                 ;		sbr r16, (1<<ACIE)
+                 ;		out ACSR, r16
+                 ;************************************
+                 ; Разрешим необходимые прерывания по группам контактов
+                 ; Pin Change Interrupt Control Register - PCICR
+                 ; Регистр PCICR
+                 ;	Bit 7 6 5 4 3 	2 		1 		0
+                 ;		– – – – – PCIE2    PCIE1    PCIE0          
+                 ;	ldi r16, (1<<PCIE0)|(1<<PCIE1)|(1<<PCIE2)
+                 ;	sts PCICR, r16
+                 
+                 ;!!! заметим что прерывание произойдут также и в том случае
+                 ; если ноги настроены на выход)))
+                 ; Наложим маску на необходимые ноги из группы ног МК
+                 ;Pin Change Mask Register 2 – PCMSK2
+                 ; Регистр PCMSK2
+                 ;Bit 	7 		6 		5		 4		 3		 2		 1		 0
+                 ;	PCINT23   PCINT22   PCINT21  PCINT20 PCINT19 PCINT18 PCINT17 PCINT16        
+                 ;	ldi r16, (1<<PCINT21)|(1<<PCINT22)
+                 ;	sts PCMSK2, r16
+                 
+                 ;Pin Change Mask Register 1 – PCMSK1
+                 ; Регистр PCMSK1
+                 ;   Bit 7 6 	   5		4 		3		 2		 1		 0
+                 ;		– PCINT14  PCINT13  PCINT12 PCINT11  PCINT10 PCINT9  PCINT8 
+                 ;	ldi r16, (1<<PCINT8)|(1<<PCINT9);|(1<<PCINT13)
+                 ;	sts PCMSK1, r16
+                 
+                 ; Pin Change Mask Register 0 – PCMSK0
+                 ; Регистр PCMSK0
+                 ; Bit 		7 	6		5		4		3		2		1		0
+                 ;		PCINT7  PCINT6  PCINT5  PCINT4  PCINT3  PCINT2  PCINT1  PCINT0  
+                 ;	ldi r16, (1<<PCINT6)|(1<<PCINT7)
+                 ;	sts PCMSK0, r16
+                 ;-------------------------- Инициализация прерываний внешних INT0/INT1
+                 		
+                 		;ldi r16, 0b00001000
+                 		;out MCUCR, r16
+                 		;ldi r16,0b10000000
+                 		;out GIMSK, r16
+                 
+                 ;************************************
+                 
+                 ;************************************
+                 ;-------------------------- Настройка АЦП
+                 ;		ldi r16, 0x21			; берем регистр мультиплексирования АЦП	и		
+                 ;		sts ADMUX, r16			; на 1-й канал (от 0 до 7 у нас 8 каналов)
+                 		; считываем восемь бит, внешнее опорное +5В от КРЕН!!!
+                 ;-----------
+                 ;		ldi r16, 0xDE			; запус однократного преобразования
+                 ;		sts ADCSRA, r16
+                 ;************************************
+                 
+                 ;************************************
+                  	;Timer/Counter Control Register A – TCCR0A
+                 	;7		6		5		4		3		2		1		0
+                 	;COM0A1 COM0A0  COM0B1  COM0B0 	– 		– 		WGM01   WGM00
+                 	; Bits 7:6 – COM0A1:0: Compare Match Output A Mode
+                 	; Bits 5:4 – COM0B1:0: Compare Match Output B Mode
+                 	; Bits 1:0 – WGM01:0: Waveform Generation Mode
+                 	; Compare Output Mode, non-PWM Mode
+                 	;COM0A1 COM0A0  Description
+                 	;0 		0 		Normal port operation, OC0A disconnected.
+                 	;0 		1 		инвертируется OC0A on Compare Match
+                 	;1 		0 		очищается OC0A on Compare Match
+                 	;1 		1 		устанавливается OC0A on Compare Match
+                 	; Compare Output Mode, Fast PWM Mode(1)
+                 	;COM0A1 COM0A0  Description
+                 	;0 		0 		Normal port operation, OC0A disconnected.
+                 	;0 		1 		WGM02 = 0: Normal Port Operation, OC0A Disconnected.
+                 	;				WGM02 = 1: инвертируется OC0A on Compare Match.
+                 	;1 		0 		очищается OC0A on Compare Match, set OC0A at TOP
+                 	;1 		1 		устанавливается OC0A on Compare Match, clear OC0A at TOP
+                 	; Compare Output Mode, Phase Correct PWM Mode(1)
+                 	;COM0A1 COM0A0  Description
+                 	;0 		0 		Normal port operation, OC0A disconnected.
+                 	;0 		1 		WGM02 = 0: Normal Port Operation, OC0A Disconnected.
+                 	;				WGM02 = 1: инвертируется OC0A on Compare Match.
+                 	;1 		0 		Clear OC0A on Compare Match when up-counting. 
+                 	;				Set OC0A on Compare Match when down-counting.
+                 	;1 		1 		Set OC0A on Compare Match when up-counting. 
+                 	;				Clear OC0A on Compare Match when down-counting.
+                 	; для COMOBx - тоже самое
+                 	;Waveform Generation Mode Bit Description (WGM2 in TCCR0B)
+                 	;Mode     WGM2     WGM1     WGM0 	Timer/Counter 	TOP		Update of	TOV Flag
+                 	;									Mode of 				OCRx at		Set on
+                 	;									Operation 
+                 	;0 			0 		0 		0       Normal 			0xFF    Immediate   MAX
+                 	;1 			0 		0 		1       PWM, Phase 		0xFF    TOP 		BOTTOM
+                 	;									Correct
+                 	;2 			0 		1 		0       CTC 			OCRA    Immediate   MAX
+                 	;									сброс при совпадении
+                 	;3 			0 		1 		1       Fast PWM 		0xFF    TOP 		MAX
+                 	;4 			1 		0 		0       Reserved 		– 		– 			–
+                 	;5 			1 		0 		1       PWM, Phase 		OCRA    TOP 		BOTTOM
+                 	;									Correct
+                 	;6 			1 		1 		0       Reserved 		– 		– 			–
+                 	;7 			1 		1 		1       Fast PWM 		OCRA    TOP 		TOP
+                 	; MAX        = 0xFF,  BOTTOM = 0x00
+                 
+                 	;Timer/Counter Control Register B – TCCR0B
+                 	;7		6		5		4		3		2		1		0
+                 	; FOC0A FOC0B 	– 		– 		WGM02   CS02    CS01    CS00  
+                 	; Bit 7 – FOC0A: Force Output Compare A
+                 	; Bit 6 – FOC0B: Force Output Compare B
+                 	; Bits 5:4 – Res: Reserved Bits
+                 	; Bit 3 – WGM02: Waveform Generation Mode
+                 	; Bits 2:0 – CS02:0: Clock Select
+                 	; Clock Select Bit Description 
+                 	;CS02     CS01     CS00     Description
+                 	;0 			0 		0        No clock source (Timer/Counter stopped)
+                 	;0 			0 		1        clk/(No prescaling)
+                 	;0 			1 		0        clk/8 (From prescaler)
+                 	;0 			1 		1        clk/64 (From prescaler)
+                 	;1 			0 		0        clk/256 (From prescaler)
+                 	;1 			0 		1        clk/1024 (From prescaler)
+                 	;1 			1 		0        External clock source on T0 pin. Clock on falling edge.
+                 	;1 			1 		1        External clock source on T0 pin. Clock on rising edge.
+                 
+                 
+                 	;Timer/Counter Interrupt Mask Register – TIMSK0
+                 	;7		6		5		4		3		2		1		0
+                 	;-      -       -    	- 		-      OCIE0B  OCIE0A  TOIE0
+                 	; Bit 2 – OCIE0B: Timer/Counter0 Output Compare Match B Interrupt Enable
+                 	; Bit 1 – OCIE0A: Timer/Counter0 Output Compare Match A Interrupt Enable
+                 	; Bit 0 – TOIE0: Timer/Counter0 Overflow Interrupt Enable
+                 
+                 ; General Timer/Counter Control Register – GTCCR
+                 ; Регистр TCCR
+                 ;Bit 7  6 5 4 3 2 	1 		0
+                 ;	TSM – – – – – PSRASY   SRSYNC       
+                 ;-------------------------- Инициализация Таймера 0	
+                 
+                 ;		ldi		r16, 0x05	; установить предделитель таймера0 в 1024,
+                 ;		out		TCCR0, r16	; теперь таймер будет считать в 1024 раз медленнее чем тактовая частота МК
+                 ;		; при внутреннем такте в 8МГц, частота счета 0,0078 МГц!!!
+                 ;		ldi		r16, T0PRE	; загрузим начальное значение таймера0
+                 ;		out		TCNT0, r16	; начать счет 8-ми битного таймера с числа 255-32
+                 ;							; прерывание происходит при переполнении, т.е. достижении числа 255
+                 ;
+                 ;		ldi		r16, 0x01	; разрешить прерывание по переполнению таймера0 и таймера2
+                 ;		sts		TIMSK, r16	; 
+                 ;************************************
+                 
+                 ;************************************
+                 ;-------------------------- Инициализация Таймера 2	
+                 
+                 ;		ldi		r16, 0x05	; установить предделитель таймера0 в 1024,
+                 ;		sts		TCCR2, r16	; теперь таймер будет считать в 1024 раз медленнее чем тактовая частота МК
+                 ;		; при внутреннем такте в 8МГц, частота счета 0,0078 МГц!!!
+                 ;		ldi		r16, T2PRE	; загрузим начальное значение таймера0
+                 ;		sts		TCNT2, r16	; начать счет 8-ми битного таймера с числа 255-32
+                 ;							; прерывание происходит при переполнении, т.е. достижении числа 255
+                 ;
+                 ;		ldi		r16, TIMSK	; разрешить прерывание по переполнению таймера0 и таймера2
+                 ;		ori		r16, TOIE2<<1
+                 ;		sts		TIMSK, r16	; 
+                 ;************************************
+                 
+                 ;************************************
+                 ;-------------------------- Инициализация USARTa
+                 
+                 ;		ldi r16, 0x0d;300 baud
+                 ;		out UBRRH, r16
+                 ;		ldi r16, 0x67;9600
+                 ;		out UBRRL, r16
+                 ;		ldi r16, 0b00000010
+                 ;		out UCSRA, r16
+                 ;		ldi r16, 0b10011000
+                 ;		out UCSRB, r16
+                 ;		ldi r16, 0b10000111
+                 ;		out UCSRC, r16
+                 
+                 ;************************************
+                 
+                 ;************************************
+                 ; Разрешим режим сна
+                 ; MCU Control Register – MCUCR	
+                 ; Регистр MCUCR
+                 ;	Bit 7 6 5 4  3   2   1  0
+                 ;		SE SM2 SM1 SM0 ISC11 ISC10 ISC01 ISC00 	
+00004c e800      	ldi r16, (1<<SE)	
+00004d bf05      	out MCUCR, r16
+                 ;************************************
+                 
+                 ;************************************
+                 	;Watchdog Timer Control Register - WDTCSR
+                 	;7		6		5		4		3		2		1		0
+                 	;WDIF   WDIE    WDP3    WDCE    WDE     WDP2    WDP1    WDP0  
+                 	; Bit 7 - WDIF: Watchdog Interrupt Flag
+                 	; Bit 6 - WDIE: Watchdog Interrupt Enable
+                 	; Bit 4 - WDCE: Watchdog Change Enable
+                 	; Bit 3 - WDE: Watchdog System Reset Enable
+                 	; Bit 5, 2..0 - WDP3..0: Watchdog Timer Prescaler 3, 2, 1 and 0
+                 	;WDTON(1)	WDE WDIE    Mode 					Action on Time-out
+                 	;	1 		0 	0 		Stopped 				None
+                 	;	1 		0 	1 		Interrupt Mode 			Interrupt
+                 	;	1 		1 	0 		System Reset Mode 		Reset
+                 	;	1 		1 	1		Interrupt and System 	Interrupt, then go to
+                 	;						Reset Mode				System Reset Mode
+                 	;	0 		x 	x 		System Reset Mode 		Reset
+                 	;Note:      1.  WDTON Fuse set to “0“ means programmed and “1” means unprogrammed.
+                 	;WDP3     WDP2     WDP1     WDP0	Number of WDT Oscillator 	Typical Time-out at
+                 	;									Cycles						VCC = 5.0V
+                 	;	0 		0 		0 		0 		2K (2048) cycles 			16 ms
+                 	;	0 		0 		0 		1 		4K (4096) cycles 			32 ms
+                 	;	0 		0 		1 		0 		8K (8192) cycles 			64 ms
+                 	;	0 		0 		1 		1 		16K (16384) cycles 			0.125 s
+                 	;	0 		1 		0 		0 		32K (32768) cycles 			0.25 s
+                 	;	0 		1 		0	 	1 		64K (65536) cycles 			0.5 s
+                 	;	0 		1 		1 		0 		128K (131072) cycles 		1.0 s
+                 	;	0 		1 		1 		1 		256K (262144) cycles 		2.0 s
+                 	;	1 		0 		0 		0 		512K (524288) cycles 		4.0 s
+                 	;	1 		0 		0 		1 		1024K (1048576) cycles 		8.0 s
+                 ;--------------------------- Выключение сторожевого таймера
+                 WDT_off:
+                 ; Turn off global interrupt
+00004e 94f8      cli
+                 ; Reset Watchdog Timer
+00004f 95a8      wdr
+                 ; Clear WDRF in MCUSR
+000050 b704      in    r16, MCUSR
+000051 7000      andi  r16, (0xff & (0<<WDRF))
+000052 bf04      out   MCUSR, r16
+                 ; Write logical one to WDCE and WDE
+                 ; Keep old prescaler setting to prevent unintentional time-out
+000053 9100 0021 lds r16, WDTCSR
+000055 6108      ori   r16, (1<<WDCE) | (1<<WDE)
+000056 9300 0021 sts WDTCSR, r16
+                 ; Turn off WDT
+000058 e000      ldi   r16, (0<<WDE)
+000059 9300 0021 sts WDTCSR, r16
+                 ;************************************
+                 
+                 ;************************************
+                 ; очистка всех рабочих регистров
+                 
+00005b 2700      	clr R16
+00005c 2711      	clr R17
+00005d 2722      	clr R18
+00005e 2733      	clr R19
+00005f 2744      	clr R20
+000060 27ee      	clr ZL
+000061 27ff      	clr ZH
+                 
+                 ; задание начальных условий всем зарезервированным ячейкам
+000062 e002      	ldi r16,2
+000063 9300 0060 	sts Power, r16
+                 
+                 ; разрешение прерываний
+000065 9478      	sei ; Enable interrupts
+                 
+                 // переход к главной функции программы
+000066 c1ac      	rjmp main
+                 ;************************************
+                 #include"EXT_INT.inc"	;файл обработки внешних прерываний
+                 
+                 ;**
+                 ;**
+                 ;**
+                 ;************************************
+                 EXT_INT0:
+                 
+000067 95a3      		inc Flags; увеличить номер режима
+000068 30a7      		cpi Flags,7 // проверяем не стал ли номер режима больше, чем их вообще существует
+000069 f440      		brsh cc1
+                 int0_fin:
+00006a e09a      		ldi cnt1,10
+                 dec_int0:
+00006b d038      		rcall DelaySmall
+00006c 959a      		dec cnt1
+00006d f7e9      		brne dec_int0
+                 
+                 ; организуем программный сброс
+                 ; флага внешнего прерывания INT0
+00006e b70a      		in r16, GIFR
+00006f 6400      		ori r16,0b01000000
+000070 bf0a      		out GIFR, r16
+000071 9518      		reti
+                 
+                 cc1: 
+000072 27aa      		clr Flags // тогда обнуляем его(закольцовка)
+000073 cff6      		rjmp int0_fin
+                 
+                 EXT_INT1:
+                 
+000074 95aa      		dec Flags; уменьшить номер режима
+000075 3faf      		cpi Flags,255 // проверяем не стал ли номер режима меньше нуля
+000076 f440      		brsh cc
+                 int1_fin:
+000077 e09a      		ldi cnt1,10
+                 dec_int1:
+000078 d02b      		rcall DelaySmall
+000079 959a      		dec cnt1
+00007a f7e9      		brne dec_int1
+                 
+                 ; организуем программный сброс
+                 ; флага внешнего прерывания INT1
+00007b b70a      		in r16, GIFR
+00007c 6800      		ori r16,0b10000000
+00007d bf0a      		out GIFR, r16
+00007e 9518      		reti
+                 
+                 cc: 
+00007f e0a6      		ldi Flags,6 // тогда присваеваем ему максимум режима(закольцовка)
+000080 cff6      		rjmp int1_fin
+                 #include"TIM0.inc"		;файл работы с Таймером0
+                 
+                 ;**
+                 ;**
+                 ;**
+                 ;************************************
+                 
+                 
+                 
+                 
+                 
+                 
+                 //Обработка прерывания для формирования импульса по таймеру 0
+                 //Код может быть использован для управления тиристором
+                 //длительность задержки определяет момент включения тиристора
+                 TIM0_OVF_TRIAC:
+                 ; disable Timer0
+000081 b709      	in r16,TIMSK
+000082 7f0f      	cbr r16,0<<TOIE0
+000083 bf09      	out TIMSK, r16
+000084 2700      	clr r16
+000085 bf03      	out TCCR0, r16
+                 
+                 ; impuls
+000086 9a90      	sbi PORTD,0
+000087 e031      	ldi r19,1
+000088 d011      	rcall Delay
+000089 9890      	cbi PORTD,0
+                 
+00008a 9518      	reti
+                 #include"ANA_COMP.inc"	;файл работы с Аналоговым компоратором
+                 
+                 ;** Файл работы с аналоговым компоратором
+                 ;**
+                 ;**
+                 ;************************************
+                 
+                 ;************************************
+                 //обработка прерывания от аналогового компоратора
+                 //запускаем таймер 0 для регулирования угла открывания тиристора
+                 ANA_COMP_TRIAC:
+                 
+                 	//выставим определенную задержку на Таймер 0
+00008b e0f0      	LDI ZH,High(2*TableTRIAC)
+00008c e3e0      	LDI ZL,Low(2*TableTRIAC)
+00008d 9110 0060 	lds r17, Power
+00008f 0fe1      	add ZL,r17
+000090 2711      	clr r17
+000091 1ff1      	adc ZH,r17
+000092 9104      	lpm r16,Z
+                 
+                 	;ldi r16,255-4999/64
+000093 bf02      	out TCNT0,r16
+000094 b709      	in r16,TIMSK
+000095 6001      	sbr r16,1<<TOIE0	//разрешаем прерывание от Т0
+000096 bf09      	out TIMSK, r16
+000097 e003      	ldi r16,(1<<CS00)+(1<<CS01)	//предделитель на 64
+000098 bf03      	out TCCR0, r16
+                 
+000099 9518      	reti
+                 ;************************************
+                 #include"Delay.inc"		;файл организации задержек
+                 
+                 ;** Файл организациии задержек программным способом
+                 ;**
+                 ;**
+                 ;************************************
+                 
+                 ;Формула данной задержки
+                 ;(3*R20+5)*R19+10
+                 ; R20=165
+                 ; r19 =0 128010 тактов
+                 ; r19 =1 510 тактов
+                 ; r19 =2 1010 татов
+                 Delay:
+00009a 934f      	push r20
+                 loop0:
+00009b ea45      	ldi r20,0xA5
+                 loop1:
+00009c 954a      	dec r20
+00009d f7f1      	brne loop1
+00009e 0000      	nop
+00009f 0000      	nop
+0000a0 953a      	dec r19
+0000a1 f7c9      	brne loop0
+                 
+0000a2 914f      	pop r20
+0000a3 9508      	ret
+                 
+                 ;************************************
+                 ;Небольшая задержка в 500 тактов
+                 ;Формула 12+4*R16
+                 ;При 122 задержка в 500 тактов что соответствует 0,5мсек при 1Мгц
+                 DelaySmall:
+0000a4 930f      		push r16
+0000a5 e70a      		ldi r16, 122
+                 delay_loop:
+0000a6 0000      		nop
+0000a7 950a      		dec r16
+0000a8 f7e9      		brne delay_loop
+0000a9 0000      		nop
+0000aa 910f      		pop r16
+0000ab 9508      		ret
+                 ;************************************
+                 ;формула данной подпрограммы задержки
+                 ;((3*R20+3)*R21+4)*R22+20)
+                 ;
+                 ; пару примеров
+                 ;	для 1000000 тактов   100 165  20
+                 ;	для 2000000 тактов	  45 161  90	
+                 ;	для  500000 тактов	 223 248   3
+                 ;	для 6000000 тактов	 135 173  85
+                 ;	для 8000000 тактов	  95 224 124
+                 DelayLong:
+0000ac 934f      	push r20
+0000ad 935f      	push r21
+0000ae 936f      	push r22
+                 
+0000af e164      	ldi r22, 20
+                 loopL2:
+0000b0 ea55      	ldi r21, 165
+                 loopL1:
+0000b1 e644      	ldi r20,100
+                 loopL0:
+0000b2 954a      	dec r20
+0000b3 f7f1      	brne loopL0
+0000b4 955a      	dec r21
+0000b5 f7d9      	brne LoopL1
+0000b6 0000      	nop
+0000b7 956a      	dec r22
+0000b8 f7b9      	brne LoopL2
+                 
+0000b9 0000      	nop
+0000ba 916f      	pop r22
+0000bb 915f      	pop r21
+0000bc 914f      	pop r20
+0000bd 9508      	ret
+                 #include"SubRouters.inc"
+                 
+                 ;** Файл вспомогательных подпрограмм
+                 ;**
+                 ;**
+                 ;************************************
+                 
+                 		;-------------------------- Подпрограммы
+                 
+                 ;пример подпрограммы подготовки данных на вывод
+                 ; будь то температура, напряжение, значение тока или другая цифровая информация(не буквенная)
+                 ; при необходимости отображать признак точки он должен быть добавлен к извлеченной константе
+                 
+                 NumberTC:
+                 ; подпрограмма определения цифр для отображения
+                 ; рабочий байт передаеться из 
+                 ;	tmpL2 это младший байт
+                 ; 	tmpH2 это старший байт
+                 		
+0000be e604      		ldi tmpL, low(100)
+0000bf e010      		ldi tmpH, high(100)
+0000c0 d00c      		rcall digit
+0000c1 9200 00b5 		sts TT2, r0
+                 
+0000c3 e00a      		ldi tmpL, low(10)
+0000c4 e010      		ldi tmpH, high(10)
+0000c5 d007      		rcall digit
+0000c6 9200 00b6 		sts TT1, r0
+                 		
+0000c8 2f92      		mov cnt1, tmpL2
+0000c9 d00a      		rcall number_init
+0000ca 9200 00b7 		sts TT0, r0
+                 		
+0000cc 9508      		ret
+                 
+                 ; подпрограмма разложения числа на разряды
+0000cd ef9f      digit:	ldi cnt1, -1	; сразу инициализируем -1
+0000ce 9593      digit_1:inc cnt1		; инкрементируем, т.е. впервый раз начинаем с нуля!!!
+0000cf 1b20      		sub tmpL2, tmpL	; вычитание младшего байта
+0000d0 0b31      		sbc tmpH2, tmpH	; вычитание с переносом старшего байта
+0000d1 f7e0      		brsh digit_1	; в случае коль не отрицательное повторить
+0000d2 0f20      		add tmpL2, tmpL	; иначе восстанавливаем последнее значение
+0000d3 1f31      		adc tmpH2, tmpH	; в итоге остается все что меньше вычитаемого
+                 						; т.е. вычитая 10 остаток единицы!!!
+                 ;		ret
+                 
+                 ; подпрограмма извлечения константы для индикатора из таблицы
+                 number_init:
+0000d4 e0f0      		ldi zh, high(TableIndicator*2)
+0000d5 e2e6      		ldi zl, low(TableIndicator*2)
+0000d6 0fe9      		add zl, cnt1
+0000d7 2799      		clr cnt1
+0000d8 1ff9      		adc zh, cnt1
+0000d9 95c8      		lpm	; результат в R0
+0000da 9508      		ret
+                 
+                 ; Файлы подключения подпрограмм уроков
+                 #include"Lesson001_IO.inc"
+                 
+                 ;****************************************
+                 ;**
+                 ;**			START
+                 ;**		LESSON_001_IO
+                 ;**
+                 ;**
+                 ;****************************************
+                 Подпрограмма формирования меанрдра
+                 ;	rjmp test_main
+                 ;********
+                 Подпрограмма вывода на семисегментный индикатор цифр
+                 ;	rjmp work_indicator
+                 ;********
+                 Подпрограмма формирования задержки программным способом
+                 ;	ldi r19,0
+                 ;	rcall delay
+                 ;********
+                 Подпрограмма формирования задержки программным способом
+                 ;	rcall DelaySmall
+                 ;********
+                 Подпрограмма работы с индикатором в динамическом режиме
+                 ;	rjmp work_indicator2
+                 ;********
+                 Подпрограмма работы с BCD индикатором
+                 ;	rjmp work_indBCD
+                 ;********
+                 Подпрограмма формирования световых эффектов
+                 - бегущая точка
+                 - и так далее
+                 ;	rjmp work_Color
+                 ;********
+                 Подпрограмма работы с клавиатурой
+                 ;	rjmp work_Keyboard
+                 ;********
+                 Подпрограмма опроса кнопок программным способом
+                 ;	rjmp work_Button
+                 ;********
+                 Подпрограмма работы с кнопками по прерываниям
+                 ;	rjmp work_ButINT
+                 ;********
+                 Подпрограмма работы с кнопками по прерываниями №2
+                 ;	rjmp work_ButINT01
+                 ;********
+                 ;****************************************
+                 ;**		
+                 ;**			END
+                 ;**		LESSON_001_IO
+                 ;**
+                 ;**
+                 ;****************************************
+                 */
+                 ;**************************************
+                 ; работа с кнопками по внешним прерываниям
+                 ; это не освобождает нас от борьбы с дребезгом
+                 ; а также определения нажатой кнопки
+                 ;
+                 ;!!!!!! ОБЯЗАТЕЛЬНО в векторе прерываний инициализировать
+                 ; переходы на метку EXT_INT0 с адрессом 0x001 и EXT_INT1  с адресом 0x002
+                 work_ButINT01:
+                 ;-------------------------- Инициализация Порта ввода/вывода B
+                 
+0000db ef0f      		ldi		r16, 0xFF	; Записываем число $FF в регистр r16
+0000dc bb07      		out		DDRB, r16	; Записываем это число в DDRB
+0000dd ef00      		ldi		r16, 0xF0	; Записываем число $F0 в регистр r16
+0000de bb08      		out		PORTB, r16	; Записываем то  же число в PORTB
+                 ; проинициализировали порт B на вывод 
+                 
+                 ;-------------------------- Инициализация Порта ввода/вывода D
+                 
+0000df e000      		ldi		r16, 0x00	; Записываем число $00 в регистр r16
+0000e0 bb01      		out		DDRD, r16	; Записываем это число в DDRD
+0000e1 e000      		ldi		r16, 0x00	; Записываем число $00 в регистр r16
+0000e2 bb02      		out		PORTD, r16	; Записываем то  же число в PORTD
+                 ; проинициализировали порт D на ввод 
+                 
+                 ; настроим обработку внешних прерываний по приходу фронта сигнала
+0000e3 b705      		in r16, MCUCR
+0000e4 600f      		ori r16,0x0f
+0000e5 bf05      		out MCUCR,r16
+                 
+                 ; разрешим наши внешние прерывания	
+0000e6 b70b      		in r16,GICR
+0000e7 6c00      		ori r16,(1<<INT0)|(1<<INT1)
+0000e8 bf0b      		out GICR,r16
+                 
+                 
+                 ; преобразуем регистр для вывода
+0000e9 2f5a      	mov tmp2,Flags
+                 ;	ldi tmp3,0x0F
+                 ;	eor tmp2,tmp3
+                 ; вывод на BCD индикатор
+0000ea 0000      nop
+0000eb 0000      nop
+0000ec bb58      	out PORTB,tmp2
+                 
+0000ed 9588      		sleep
+0000ee cffa      		rjmp PC-5
+                 
+                 ;**************************************
+                 
+                 ;**************************************
+                 ; работа с кнопками по внешним прерываниям
+                 ; это не освобождает нас от борьбы с дребезгом
+                 ; а также определения нажатой кнопки
+                 ;
+                 work_ButINT:
+                 ;-------------------------- Инициализация Порта ввода/вывода B
+                 
+0000ef ef0f      		ldi		r16, 0xFF	; Записываем число $FF в регистр r16
+0000f0 bb07      		out		DDRB, r16	; Записываем это число в DDRB
+0000f1 ef00      		ldi		r16, 0xF0	; Записываем число $F0 в регистр r16
+0000f2 bb08      		out		PORTB, r16	; Записываем то  же число в PORTB
+                 ; проинициализировали порт B на вывод 
+                 
+                 ;-------------------------- Инициализация Порта ввода/вывода D
+                 
+0000f3 e000      		ldi		r16, 0x00	; Записываем число $00 в регистр r16
+0000f4 bb01      		out		DDRD, r16	; Записываем это число в DDRD
+0000f5 e000      		ldi		r16, 0x00	; Записываем число $00 в регистр r16
+0000f6 bb02      		out		PORTD, r16	; Записываем то  же число в PORTD
+                 ; проинициализировали порт D на ввод 
+                 
+                 ; настроим обработку внешних прерываний по приходу фронта сигнала
+0000f7 b705      		in r16, MCUCR
+0000f8 600f      		ori r16,0x0f
+0000f9 bf05      		out MCUCR,r16
+                 
+                 ; разрешим наши внешние прерывания	
+0000fa b70b      		in r16,GICR
+0000fb 6c00      		ori r16,(1<<INT0)|(1<<INT1)
+0000fc bf0b      		out GICR,r16
+                 
+0000fd 9588      		sleep
+0000fe cffe      		rjmp PC-1
+                 
+                 ;!!!!!! ОБЯЗАТЕЛЬНО в векторе прерываний инициализировать
+                 ; переходы на метку EXT_INT с адрессов 0x001 и 0x002
+                 EXT_INT:
+                 ; включим светик на выводе РВ0
+                 ; для индикации вхождения на обработку прерывания только для тестов
+0000ff 9ac0      	sbi PORTB,PB0
+                 
+                 ; организуем небольшую программную задержку перед чтением нажатой кнопки
+000100 2755      	clr tmp2
+000101 e098      	ldi cnt1,8
+                 searchButINT:
+000102 959a      	dec cnt1
+000103 f7f1      	brne searchButINT
+                 ; если кнопка удерживалась малый промежуток времени
+                 ; то прерывание вызвано ошибочно
+000104 b340      	in	tmp1,PIND 
+000105 704c      	andi	tmp1,0x0C
+000106 304c      	cpi tmp1,0x0C
+000107 f059      	breq end_INT
+                 ; начинаем обрабатывать нажатую кнопку
+                 ; опросим ее 16 раз чтоб убедиться что нажата определенная кнопка
+000108 e190      	ldi cnt1,16
+                 find_butINT:
+000109 2f54      	mov tmp2,tmp1
+                 
+00010a b340      	in	tmp1,PIND 
+00010b 704c      	andi	tmp1,0x0C
+                 
+00010c 1754      	cp tmp2,tmp1
+00010d f7d9      	brne find_butINT
+                 
+00010e 959a      	dec cnt1
+00010f f7c9      	brne find_butINT
+                 
+                 ; преобразуем регистр для вывода
+000110 e060      	ldi tmp3,0x00
+000111 2756      	eor tmp2,tmp3
+                 
+000112 bb58      	out PORTB,tmp2
+                 end_INT:
+                 ; отметим что для выхода из обработки прерывания
+                 ; обязательно используется специальная команда reti
+000113 9518      	reti
+                 
+                 ;**************************************
+                 ; работа с клавиатурой
+                 ; реализуем опрос кнопок программно
+                 ;
+                 work_Button:
+                 ;-------------------------- Инициализация Порта ввода/вывода B
+                 
+000114 ef0f      		ldi		r16, 0xFF	; Записываем число $FF в регистр r16
+000115 bb07      		out		DDRB, r16	; Записываем это число в DDRB
+000116 ef00      		ldi		r16, 0xF0	; Записываем число $F0 в регистр r16
+000117 bb08      		out		PORTB, r16	; Записываем то  же число в PORTB
+                 ; проинициализировали порт B на вывод 
+                 
+                 ;-------------------------- Инициализация Порта ввода/вывода D
+                 
+000118 e000      		ldi		r16, 0x00	; Записываем число $00 в регистр r16
+000119 bb01      		out		DDRD, r16	; Записываем это число в DDRD
+00011a e000      		ldi		r16, 0x00	; Записываем число $00 в регистр r16
+00011b bb02      		out		PORTD, r16	; Записываем то  же число в PORTD
+                 ; проинициализировали порт D на ввод 
+                 
+                 searchBut:
+00011c b340      	in	tmp1,PIND 
+00011d 704f      	andi	tmp1,0x0F
+00011e 304f      	cpi tmp1,0x0F
+00011f f3e1      	breq searchBut
+                 	
+000120 2755      	clr tmp2
+000121 e190      	ldi cnt1,16
+                 find_but:
+000122 2f54      	mov tmp2,tmp1
+                 
+000123 b340      	in	tmp1,PIND 
+000124 704f      	andi	tmp1,0x0F
+                 
+000125 1754      	cp tmp2,tmp1
+000126 f7d9      	brne find_but
+                 
+000127 959a      	dec cnt1
+000128 f7c9      	brne find_but
+                 
+                 ; преобразуем регистр для вывода
+000129 e060      	ldi tmp3,0x00
+00012a 2756      	eor tmp2,tmp3
+                 
+00012b bb58      	out PORTB,tmp2
+                 
+00012c cfef      	rjmp searchBut
+                 
+                 ;**************************************
+                 ; работа с клавиатурой
+                 ; реализуем динамический опрос клавиатуры
+                 ;
+                 work_KeyBoard:
+                 ;-------------------------- Инициализация Порта ввода/вывода B
+                 
+00012d ef0f      		ldi		r16, 0xFF	; Записываем число $FF в регистр r16
+00012e bb07      		out		DDRB, r16	; Записываем это число в DDRB
+00012f ef00      		ldi		r16, 0xF0	; Записываем число $F0 в регистр r16
+000130 bb08      		out		PORTB, r16	; Записываем то  же число в PORTB
+                 ; проинициализировали порт B на вывод 
+                 
+                 ;-------------------------- Инициализация Порта ввода/вывода D
+                 
+000131 e007      		ldi		r16, 0x07	; Записываем число $07 в регистр r16
+000132 bb01      		out		DDRD, r16	; Записываем это число в DDRD
+000133 e000      		ldi		r16, 0x00	; Записываем число $F0 в регистр r16
+000134 bb02      		out		PORTD, r16	; Записываем то  же число в PORTD
+                 ; проинициализировали порт D на вывод 0..2 и на ввод 3..7 
+                 Start_Key:
+                 ; зажгем линии клавиатуры
+000135 b342      	in	tmp1,PORTD 
+000136 6047      	ori	tmp1,0x07
+000137 bb42      	out PORTD,tmp1
+                 ;считаем, нажата ли хоть одна клавиша
+000138 b340      	in tmp1,PIND
+000139 7748      	andi tmp1,0b01111000
+00013a f3d1      	breq Start_Key; ждем нажатия кнопки
+                 ; для борьбы с дребезгом 
+                 ; будем считывать кнопки пока не считаем 16 раз одну и ту же комбинацию
+00013b 2755      	clr tmp2
+00013c e190      	ldi cnt1,16
+                 Line1:	
+                 ; смотрим линию 1 цифры 1 4 7 *
+00013d e060      	ldi tmp3,0
+00013e 9891      	cbi PORTD,PD1
+00013f 9892      	cbi PORTD,PD2
+                 ; если нашли на линии 1 кнопку идем ее определять
+000140 b340      	in tmp1,PIND
+000141 7748      	andi tmp1,0b01111000
+000142 f009      	breq Line2
+000143 c00d      	rjmp find_key
+                 Line2:
+                 ; смотрим линию 2 цифры 2 5 8 0
+000144 e061      	ldi tmp3,1
+000145 9890      	cbi PORTD,PD0
+000146 9a91      	sbi PORTD,PD1
+                 ; если нашли на линии 2 кнопку идем ее определять
+000147 b340      	in tmp1,PIND
+000148 7748      	andi tmp1,0b01111000
+000149 f009      	breq Line3
+00014a c006      	rjmp find_key
+                 Line3:
+                 ; смотрим линию 3 цифры 3 6 9 №
+00014b e062      	ldi tmp3,2
+00014c 9891      	cbi PORTD,PD1
+00014d 9a92      	sbi PORTD,PD2
+                 ; если нашли на линии 3 кнопку идем ее определять
+00014e b340      	in tmp1,PIND
+00014f 7748      	andi tmp1,0b01111000
+000150 f321      	breq Start_Key
+                 
+                 find_key:
+                 ; идея такая что проверяя все линии
+                 ; находим их вес
+                 ; если вес в текущем и предыдущем цикле опроса 
+                 ; совпадает, то это та кнопка что нужна
+                 ; в противном случае у нас дребезг
+                 ;
+                 ; приоритет у самой последней линии 
+                 ; при нажатии нескольких кнопок
+                 ; определим ту что ниже находится
+000151 2f54      	mov tmp2,tmp1
+                 
+000152 9983      	sbic PIND,PD3
+000153 e041      	ldi tmp1,1
+000154 9984      	sbic PIND,PD4
+000155 e044      	ldi tmp1,4
+000156 9985      	sbic PIND,PD5
+000157 e047      	ldi tmp1,7
+000158 9986      	sbic PIND,PD6
+000159 e04a      	ldi tmp1,10
+                 	
+00015a 1754      	cp tmp2,tmp1
+00015b f7a9      	brne find_key
+                 
+00015c 959a      	dec cnt1
+00015d f799      	brne find_key
+                 
+                 ; суммируем состовляющие кода нашей кнопки
+00015e 0f56      	add tmp2,tmp3
+                 ; преобразуем регистр для вывода
+00015f e06f      	ldi tmp3,0x0F
+000160 2756      	eor tmp2,tmp3
+                 
+000161 bb58      	out PORTB, tmp2
+                 
+000162 cfd2      	rjmp Start_Key
+                 ;**************************************
+                 
+                 ;**************************************
+                 ; работа с линейкой светодиодо
+                 ; реализуем несколько световых эффектов
+                 ; например
+                 ;C1	бегущая светик по кругу
+                 ;C2	бегущий светик из стороны в сторону
+                 ;C3	два последовательных светика
+                 ;C4	горит каждый второй
+                 ;
+                 work_Color:
+                 ;-------------------------- Инициализация Порта ввода/вывода B
+                 
+000163 ef0f      		ldi		r16, 0xFF	; Записываем число $FF в регистр r16
+000164 bb07      		out		DDRB, r16	; Записываем это число в DDRB
+000165 ef00      		ldi		r16, 0xF0	; Записываем число $F0 в регистр r16
+000166 bb08      		out		PORTB, r16	; Записываем то  же число в PORTB
+                 ; проинициализировали порт B на вывод 
+                 ; и погасили все светики с общим катодом(младшая тетрада)
+                 ; и с общим анодом (старшая тетрада)
+                 work_C1_:
+000167 e041      	ldi tmp1,0b00000001
+000168 2799      	clr cnt1
+                 work_C1:
+                 ;сбросим флаг переноса
+000169 9488      	clc
+                 ;проверим надо ли при сдвиге внести значение переноса
+00016a f40e      	brtc PC+2
+00016b 9408      	sec
+00016c 94e8      	clt
+                 ;проводим сдвиг
+00016d 1f44      	rol tmp1
+00016e f408      	brcc PC+2
+                 ;при необходимости запомним наличие переноса при последнем сдвиге
+00016f 9468      	set
+                 
+000170 df29      	rcall Delay
+                 
+                 ;организуем паузу выполнения эффекта
+000171 9593      	inc cnt1
+000172 3290      	cpi cnt1,32
+000173 f029      	breq work_C2_
+                 
+                 ;учитывая что у нас есть светодиоды
+                 ; как с общим анодом так и с общим катодом преобразуем выходной байт
+000174 2f54      	mov tmp2,tmp1
+000175 e06f      	ldi tmp3,0x0F
+000176 2756      	eor tmp2,tmp3
+                 	
+000177 bb58      	out PORTB,tmp2
+000178 cff0      	rjmp work_C1
+                 
+                 work_C2_:
+000179 e041      	ldi tmp1,0b00000001
+00017a 2799      	clr cnt1
+                 work_C2:
+                 ;организуем проверку в какую сторону движемся
+                 ; для этого выставляем признак флаг Т
+00017b 3840      	cpi tmp1,0b10000000
+00017c f409      	brne PC+2
+00017d 9468      	set
+00017e 3041      	cpi tmp1,0b00000001
+00017f f409      	brne PC+2
+000180 94e8      	clt
+                 	
+                 ;просмотрим в хранилище необходим ли нам бит переноса
+000181 9488      	clc
+000182 fda0      	sbrc Flags,0
+000183 9408      	sec
+                 ;организуем сдвиг
+                 ;смотрим флаг Т(направление)
+000184 1f44      	rol tmp1
+000185 f416      	brtc PC+3
+000186 9547      	ror tmp1
+000187 9547      	ror tmp1
+                 ;запоминаем флаг переноса
+000188 27aa      	clr Flags
+000189 f408      	brcc PC+2
+00018a e0a1      	ldi Flags, 1	
+                 
+00018b df0e      	rcall Delay
+                 
+00018c 9593      	inc cnt1
+00018d 3490      	cpi cnt1,64
+00018e f029      	breq work_C3_
+                 
+00018f 2f54      	mov tmp2,tmp1
+000190 ef60      	ldi tmp3,0xF0
+000191 2756      	eor tmp2,tmp3
+                 
+000192 bb58      	out PORTB,tmp2
+000193 cfe7      	rjmp work_C2
+                 
+                 work_C3_:
+000194 e043      	ldi tmp1,0b00000011
+000195 2799      	clr cnt1
+                 work_C3:
+                 ;сбросим флаг переноса
+000196 9488      	clc
+                 ;проверим надо ли при сдвиге внести значение переноса
+000197 f40e      	brtc PC+2
+000198 9408      	sec
+000199 94e8      	clt
+                 ;проводим сдвиг
+00019a 1f44      	rol tmp1
+00019b f408      	brcc PC+2
+                 ;при необходимости запомним наличие переноса при последнем сдвиге
+00019c 9468      	set
+                 
+00019d defc      	rcall Delay
+                 
+                 ;организуем паузу выполнения эффекта
+00019e 9593      	inc cnt1
+00019f 3290      	cpi cnt1,32
+0001a0 f029      	breq work_C4_
+                 
+                 ;учитывая что у нас есть светодиоды
+                 ; как с общим анодом так и с общим катодом преобразуем выходной байт
+0001a1 2f54      	mov tmp2,tmp1
+0001a2 e06f      	ldi tmp3,0x0F
+0001a3 2756      	eor tmp2,tmp3
+                 	
+0001a4 bb58      	out PORTB,tmp2
+0001a5 cff0      	rjmp work_C3
+                 
+                 work_C4_:
+0001a6 e54a      	ldi tmp1,0b01011010
+0001a7 2799      	clr cnt1
+                 
+0001a8 2f54      	mov tmp2,tmp1
+                 work_C4:
+                 	
+0001a9 def0      	rcall Delay
+                 
+                 ;организуем паузу выполнения эффекта
+0001aa 9593      	inc cnt1
+0001ab 3290      	cpi cnt1,32
+0001ac f409      	brne PC+2
+0001ad cfb9      	rjmp work_C1_
+                 
+0001ae ef6f      	ldi tmp3,0xFF
+0001af 2756      	eor tmp2,tmp3
+                 	
+0001b0 bb58      	out PORTB,tmp2
+0001b1 cff7      	rjmp work_C4
+                 
+                 ;**************************************
+                 
+                 ;**************************************
+                 ; работа с семисегментным индикатором
+                 ; поочередно выводим все цифры с 0 по 99
+                 ; для работы с индикатором используем таблицу соответствия цифр-коду
+                 ; работа с двумя индикаторами
+                 ;
+                 work_indBCD:
+                 ;-------------------------- Инициализация Порта ввода/вывода D
+                 
+0001b2 ef0f      		ldi		r16, 0xFF	; Записываем число $FF в регистр r16
+0001b3 bb01      		out		DDRD, r16	; Записываем это число в DDRD
+0001b4 e000      		ldi		r16, 0x00	; Записываем число $00 в регистр r16
+0001b5 bb02      		out		PORTD, r16	; Записываем то  же число в PORTD
+                 ; проинициализировали порт D на вывод и погасили все светики для индикатора с общим катодом
+0001b6 ef4f      	ldi tmp1,-1
+                 work_BCD:
+0001b7 9543      	inc tmp1
+0001b8 3140      	cpi tmp1,16
+0001b9 f409      	brne normBCD
+0001ba 2744      	clr tmp1
+                 normBCD:
+0001bb bb42      	out PORTD,tmp1
+0001bc deef      	rcall DelayLong
+                 	
+0001bd cff9      	rjmp work_BCD
+                 ;**************************************
+                 
+                 ;**************************************
+                 ; работа с семисегментным индикатором
+                 ; поочередно выводим все цифры с 0 по 99
+                 ; для работы с индикатором используем таблицу соответствия цифр-коду
+                 ; работа с двумя индикаторами
+                 ;
+                 work_indicator2:
+                 ;-------------------------- Инициализация Порта ввода/вывода B
+                 
+0001be ef0f      		ldi		r16, 0xFF	; Записываем число $FF в регистр r16
+0001bf bb07      		out		DDRB, r16	; Записываем это число в DDRB
+0001c0 e000      		ldi		r16, 0x00	; Записываем число $00 в регистр r16
+0001c1 bb08      		out		PORTB, r16	; Записываем то  же число в PORTB
+                 ; проинициализировали порт В на вывод и погасили все светики для индикатора с общим катодом
+                 
+                 ;-------------------------- Инициализация Порта ввода/вывода D
+                 
+0001c2 ec00      		ldi		r16, 0xC0	; Записываем число $С0 или 0b11000000 в регистр r16
+0001c3 bb01      		out		DDRD, r16	; Записываем это число в DDRD
+0001c4 e000      		ldi		r16, 0x00	; Записываем число $00 в регистр r16
+0001c5 bb02      		out		PORTD, r16	; Записываем то  же число в PORTD
+                 ; проинициализировали порт D для контроля индикатор(когда гореть и какой цифре из двух)
+                 
+                 ; теперь организуем бесконечный цикл для вывода всех цифр
+0001c6 ef4f      	ldi tmp1,-1
+0001c7 2733      	clr tmpH2
+                 work_ind2:
+0001c8 9543      	inc tmp1
+0001c9 2f24      	mov tmpL2,tmp1	
+0001ca 3624      	cpi tmpL2,100
+0001cb f409      	brne normal2
+0001cc 2744      	clr tmp1
+                 normal2:
+                 ; проведем выбор кода для соответствующей цифры
+0001cd e00a      		ldi tmpL, low(10)
+0001ce e010      		ldi tmpH, high(10)
+0001cf defd      		rcall digit
+                 
+                 ; организуем вывод десятков
+0001d0 ba08      	out PORTB, r0
+                 ; для того чтоб цифра отобразилась на индикаторе необходимо зажечь её
+0001d1 9a97      	sbi PORTD, PD7
+                 
+0001d2 2f92      		mov cnt1, tmpL2
+0001d3 df00      		rcall number_init
+                 
+0001d4 ded7      	rcall DelayLong
+0001d5 9897      	cbi PORTD, PD7
+                 
+                 ; организуем вывод единиц
+0001d6 ba08      	out PORTB, r0
+                 ; для того чтоб цифра отобразилась на индикаторе необходимо зажечь её
+0001d7 9a96      	sbi PORTD, PD6
+                 
+0001d8 ded3      	rcall DelayLong
+0001d9 9896      	cbi PORTD, PD6
+                 
+0001da cfed      	rjmp work_ind2
+                 ;**************************************
+                 
+                 ;**************************************
+                 ; работа с семисегментным индикатором
+                 ; поочередно выводим все цифры с 0 по 9
+                 ; для работы с индикатором используем таблицу соответствия цифр-коду
+                 ; работа только с одним индикатором
+                 ;
+                 ;
+                 work_indicator:
+                 ;-------------------------- Инициализация Порта ввода/вывода B
+                 
+0001db ef0f      		ldi		r16, 0xFF	; Записываем число $FF в регистр r16
+0001dc bb07      		out		DDRB, r16	; Записываем это число в DDRB
+0001dd e000      		ldi		r16, 0x00	; Записываем число $00 в регистр r16
+0001de bb08      		out		PORTB, r16	; Записываем то  же число в PORTB
+                 ; проинициализировали порт В на вывод и погасили все светики для индикатора с общим катодом
+                 
+                 ;-------------------------- Инициализация Порта ввода/вывода D
+                 
+0001df ec00      		ldi		r16, 0xC0	; Записываем число $С0 или 0b11000000 в регистр r16
+0001e0 bb01      		out		DDRD, r16	; Записываем это число в DDRD
+0001e1 e000      		ldi		r16, 0x00	; Записываем число $00 в регистр r16
+0001e2 bb02      		out		PORTD, r16	; Записываем то  же число в PORTD
+                 ; проинициализировали порт D для контроля индикатор(когда гореть и какой цифре из двух)
+                 
+                 ; теперь организуем бесконечный цикл для вывода всех цифр
+0001e3 ef1f      	ldi r17,-1
+                 work_ind:
+0001e4 9513      	inc r17	
+0001e5 301a      	cpi r17,10
+0001e6 f409      	brne normal
+0001e7 2711      	clr r17
+                 normal:
+                 ; проведем выбор кода для соответствующей цифры
+0001e8 e0f0      	LDI ZH,High(2*TableIndicator)
+0001e9 e2e6      	LDI ZL,Low(2*TableIndicator)
+0001ea 0fe1      	add ZL,r17
+0001eb 2722      	clr r18
+0001ec 1ff2      	adc ZH, r18
+0001ed 9124      	lpm r18,Z
+                 
+0001ee bb28      	out PORTB, r18
+                 ; для того чтоб цифра отобразилась на индикаторе необходимо зажечь её
+0001ef 9a97      	sbi PORTD, PD7
+                 
+0001f0 debb      	rcall DelayLong
+0001f1 9897      	cbi PORTD, PD7
+                 
+0001f2 cff1      	rjmp work_ind
+                 ;**************************************
+                 
+                 
+                 ;**************************************
+                 ; тест МК для точной подстройки частоты
+                 ; организуем меандр в 20 тактов
+                 ; 10 тактов высокий уровень
+                 ; 10 тактов низкий уровень
+                 test_main:
+0001f3 94f8      	cli
+0001f4 ef0f      	ldi r16, 0xFF
+0001f5 bb07      	out DDRB, r16
+0001f6 bb08      	out PORTB, r16
+0001f7 0000      	nop
+0001f8 0000      	nop
+0001f9 0000      	nop
+0001fa 0000      	nop
+0001fb 0000      	nop
+0001fc 0000      	nop
+0001fd ef0f      	ldi r16, 0xFF
+0001fe bb07      	out DDRB, r16
+0001ff 2700      	clr r16
+000200 bb08      	out PORTB, r16
+000201 0000      	nop
+000202 0000      	nop
+000203 0000      	nop
+000204 0000      	nop
+000205 cfed      		rjmp test_main
+                 ;**************************************
+                 #include"Lesson002_AnaComp.inc"
+                 
+                 ;****************************************
+                 ;**
+                 ;**			START
+                 ;**		LESSON_002_AnaComp
+                 ;**
+                 ;**
+                 ;****************************************
+                 Подпрограмма инициализации аналогового компоратора
+                 
+                 Подпрограмма работы по аналоговому компоратору
+                 Будем инвертировать выход каждый раз при вызове подпрограммы прерывания от компоратора
+                 
+                 
+                 ;****************************************
+                 ;**
+                 ;**			END
+                 ;**		LESSON_002_AnaComp
+                 ;**
+                 ;**
+                 ;****************************************
+                 */
+                 
+                 AnaComp_Init:
+                 ;-------------------------- Инициализация Порта ввода/вывода B
+                 
+000206 ef0f      		ldi		r16, 0xFF	; Записываем число $FF в регистр r16
+000207 bb07      		out		DDRB, r16	; Записываем это число в DDRB
+000208 e000      		ldi		r16, 0x00	; Записываем число $F0 в регистр r16
+000209 bb08      		out		PORTB, r16	; Записываем то  же число в PORTB
+                 ; проинициализировали порт B на вывод 
+                 
+00020a e00b      		ldi r16, (1<<ACIE)|(0<<ACD)|(1<<ACIS1)|(1<<ACIS0)
+00020b b908      		out ACSR, r16
+                 	
+00020c 9508      		ret
+                 ; подпрограмма инвертирования бита РВ0
+                 ; каждый раз при срабатывании компоратора
+                 ANA_COMP:
+                 
+00020d c000      rjmp work_AnaComp
+                 
+                 
+                 
+                 
+                 work_AnaComp:
+00020e b308      		in r16, PORTB
+00020f e011      		ldi r17,1<<PB0
+000210 2701      		eor r16,r17
+000211 bb08      		out PORTB,r16
+000212 9518      		reti
+                 ;****************************************
+                 
+                 
+                 
+                 
+                 
+                 
+                 
+                 
+                 
+                 
+                 
+                 //организуем бесконечный цикл
+                 main:
+000213 9478      sei	
+                 ; тут распологаем все команды нашей программы	
+                 ;	sleep
+                 ;	rjmp PC-1
+                 
+                 
+                 ;********-----------------------*********
+                 
+                 
+                 
+                 ;****************************************
+                 ;**
+                 ;**			START
+                 ;**		LESSON_002_AnaComp
+                 ;**
+                 ;**
+                 ;****************************************
+                 ;Подпрограмма инициализации аналогового компоратора
+                 ;
+                 ;Подпрограмма работы по аналоговому компоратору
+                 ;Будем инвертировать выход каждый раз при вызове подпрограммы прерывания от компоратора
+000214 dff1      	rcall AnaComp_Init
+                 ff:
+000215 0000      nop
+000216 9588      	sleep
+                 
+                 ;		in r16, PORTB
+                 ;		ldi r17,1<<PB0
+                 ;		eor r16,r17
+                 ;		out PORTB,r16
+                 ;		rcall delay
+                 
+000217 cffd      	rjmp ff
+                 ;
+                 ;****************************************
+                 ;**
+                 ;**			END
+                 ;**		LESSON_002_AnaComp
+                 ;**
+                 ;**
+                 ;****************************************
+                 
+                 
+                 
+                 ;********-----------------------*********
+                 
+                 
+                 
+                 ;****************************************
+                 ;**
+                 ;**			START
+                 ;**		LESSON_001_IO
+                 ;**
+                 ;**
+                 ;****************************************
+                 ;	rjmp test_main
+                 ;********
+                 ;	rjmp work_indicator
+                 ;********
+                 ;	ldi r19,0
+                 ;	rcall delay
+                 ;********
+                 ;	rcall DelaySmall
+                 ;********
+                 ;	rjmp work_indicator2
+                 ;********
+                 ;	rjmp work_indBCD
+                 ;********
+                 ;	rjmp work_Color
+                 ;********
+                 ;	rjmp work_Keyboard
+                 ;********
+                 ;	rjmp work_Button
+                 ;********
+                 ;	rjmp work_ButINT
+                 ;********
+                 ;	rjmp work_ButINT01
+                 ;********
+                 ;****************************************
+                 ;**		
+                 ;**			END
+                 ;**		LESSON_001_IO
+                 ;**
+                 ;**
+                 ;****************************************
+                 
+000218 cffa      	rjmp main
+                 
+                 
+
+
+RESOURCE USE INFORMATION
+------------------------
+
+Notice:
+The register and instruction counts are symbol table hit counts,
+and hence implicitly used resources are not counted, eg, the
+'lpm' instruction without operands implicitly uses r0 and z,
+none of which are counted.
+
+x,y,z are separate entities in the symbol table and are
+counted separately from r26..r31 here.
+
+.dseg memory usage only counts static data declared with .byte
+
+ATmega8 register use summary:
+r0 :   5 r1 :   0 r2 :   0 r3 :   0 r4 :   0 r5 :   0 r6 :   0 r7 :   0 
+r8 :   0 r9 :   0 r10:   0 r11:   0 r12:   0 r13:   0 r14:   0 r15:   0 
+r16: 144 r17:  19 r18:  11 r19:   6 r20:  66 r21:  34 r22:  22 r23:   0 
+r24:   0 r25:  31 r26:  10 r27:   0 r28:   0 r29:   0 r30:   7 r31:   7 
+x  :   0 y  :   0 z  :   2 
+Registers used: 13 out of 35 (37.1%)
+
+ATmega8 instruction use summary:
+adc   :   4 add   :   5 adiw  :   0 and   :   0 andi  :   9 asr   :   0 
+bclr  :   0 bld   :   0 brbc  :   0 brbs  :   0 brcc  :   3 brcs  :   0 
+breq  :   9 brge  :   0 brhc  :   0 brhs  :   0 brid  :   0 brie  :   0 
+brlo  :   0 brlt  :   0 brmi  :   0 brne  :  21 brpl  :   0 brsh  :   3 
+brtc  :   3 brts  :   0 brvc  :   0 brvs  :   0 bset  :   0 bst   :   0 
+cbi   :   8 cbr   :   1 clc   :   3 clh   :   0 cli   :   3 cln   :   0 
+clr   :  25 cls   :   0 clt   :   3 clv   :   0 clz   :   0 com   :   0 
+cp    :   3 cpc   :   0 cpi   :  13 cpse  :   0 dec   :  13 eor   :   8 
+fmul  :   0 fmuls :   0 fmulsu:   0 icall :   0 ijmp  :   0 in    :  20 
+inc   :   9 ld    :   0 ldd   :   0 ldi   :  95 lds   :   2 lpm   :   7 
+lsl   :   0 lsr   :   0 mov   :  11 movw  :   0 mul   :   0 muls  :   0 
+mulsu :   0 neg   :   0 nop   :  19 or    :   0 ori   :   8 out   :  76 
+pop   :   5 push  :   5 rcall :  17 ret   :   8 reti  :  23 rjmp  :  25 
+rol   :   3 ror   :   2 sbc   :   1 sbci  :   0 sbi   :  10 sbic  :   6 
+sbis  :   0 sbiw  :   0 sbr   :   1 sbrc  :   1 sbrs  :   0 sec   :   3 
+seh   :   0 sei   :   2 sen   :   0 ser   :   0 ses   :   0 set   :   3 
+sev   :   0 sez   :   0 sleep :   3 spm   :   0 st    :   0 std   :   0 
+sts   :   6 sub   :   1 subi  :   0 swap  :   0 tst   :   0 wdr   :   1 
+
+Instructions used: 47 out of 108 (43.5%)
+
+ATmega8 memory use summary [bytes]:
+Segment   Begin    End      Code   Data   Used    Size   Use%
+---------------------------------------------------------------
+[.cseg] 0x000000 0x000432   1028     46   1074    8192  13.1%
+[.dseg] 0x000060 0x0000c0      0     96     96    1024   9.4%
+[.eseg] 0x000010 0x000011      0      1      1     512   0.2%
+
+Assembly complete, 0 errors, 1 warnings
