@@ -1,0 +1,2 @@
+@ECHO OFF
+"C:\Program Files (x86)\Atmel\AVR Tools\AvrAssembler2\avrasm2.exe" -S "C:\Web_Pavel\Normal\0006_AmperVolmetr_mega8\labels.tmp" -fI -W+ie -o "C:\Web_Pavel\Normal\0006_AmperVolmetr_mega8\AmperVolmetr_mega8.hex" -d "C:\Web_Pavel\Normal\0006_AmperVolmetr_mega8\AmperVolmetr_mega8.obj" -e "C:\Web_Pavel\Normal\0006_AmperVolmetr_mega8\AmperVolmetr_mega8.eep" -m "C:\Web_Pavel\Normal\0006_AmperVolmetr_mega8\AmperVolmetr_mega8.map" -l "C:\Web_Pavel\Normal\0006_AmperVolmetr_mega8\AmperVolmetr_mega8.lst" "C:\Web_Pavel\Normal\0006_AmperVolmetr_mega8\AmperVolmetr_mega8.asm"

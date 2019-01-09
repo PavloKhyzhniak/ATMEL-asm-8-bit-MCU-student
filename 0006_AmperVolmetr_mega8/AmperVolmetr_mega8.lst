@@ -1,0 +1,1108 @@
+
+AVRASM ver. 2.1.9  C:\Web_Pavel\Normal\0006_AmperVolmetr_mega8\AmperVolmetr_mega8.asm Sun May 19 16:49:42 2013
+
+C:\Web_Pavel\Normal\0006_AmperVolmetr_mega8\AmperVolmetr_mega8.asm(17): Including file 'C:\Program Files (x86)\Atmel\AVR Tools\AvrAssembler2\Appnotes\m8def.inc'
+C:\Web_Pavel\Normal\0006_AmperVolmetr_mega8\AmperVolmetr_mega8.asm(82): Including file 'C:\Web_Pavel\Normal\0006_AmperVolmetr_mega8\DSEG.inc'
+C:\Web_Pavel\Normal\0006_AmperVolmetr_mega8\AmperVolmetr_mega8.asm(83): Including file 'C:\Web_Pavel\Normal\0006_AmperVolmetr_mega8\EEPROM.inc'
+C:\Web_Pavel\Normal\0006_AmperVolmetr_mega8\AmperVolmetr_mega8.asm(84): Including file 'C:\Web_Pavel\Normal\0006_AmperVolmetr_mega8\RESET.inc'
+C:\Web_Pavel\Normal\0006_AmperVolmetr_mega8\AmperVolmetr_mega8.asm(87): Including file 'C:\Web_Pavel\Normal\0006_AmperVolmetr_mega8\TIM0.inc'
+C:\Web_Pavel\Normal\0006_AmperVolmetr_mega8\AmperVolmetr_mega8.asm(88): Including file 'C:\Web_Pavel\Normal\0006_AmperVolmetr_mega8\ADC_INT.inc'
+C:\Web_Pavel\Normal\0006_AmperVolmetr_mega8\AmperVolmetr_mega8.asm(91): Including file 'C:\Web_Pavel\Normal\0006_AmperVolmetr_mega8\Delay.inc'
+C:\Web_Pavel\Normal\0006_AmperVolmetr_mega8\AmperVolmetr_mega8.asm(92): Including file 'C:\Web_Pavel\Normal\0006_AmperVolmetr_mega8\SubRouters.inc'
+                 
+                 
+                 ;**	Programm Version 001
+                 ;**	15 March 2013
+                 ;** AmperVoltMetr
+                 ;**	ATmega8 	8MHz crystal
+                 ;** Blackveolet
+                 ;** Ukraine, Donetsk region, Khartsyzsk
+                 ;** +38(095)725-20-14
+                 ;** blackveolet@mail.ru
+                 ;**************************************
+                 
+                 ;**************************************
+                 ; Main system
+                 ;**************************************
+                 .list
+                 
+                 .device ATmega8
+                 
+                 ; описание вектора прерываний
+                 
+                 ; выбор сегмента памяти программ
+                 .cseg
+                 ; Reset Handler
+000000 c030      .org 0x000 rjmp RESET ; Reset Handler
+                 ; IRQ0 Handler
+000001 9518      .org 0x001 reti;rjmp EXT_INT0 ; IRQ0 Handler
+                 ; IRQ1 Handler
+000002 9518      .org 0x002 reti;rjmp EXT_INT1 ; IRQ1 Handler
+                 ; Timer2 Compare Handler
+000003 9518      .org 0x003 reti;rjmp TIM2_COMP ; Timer2 Compare Handler
+                 ; Timer2 Overflow Handler
+000004 9518      .org 0x004 reti;rjmp TIM2_OVF ; Timer2 Overflow Handler
+                 ; Timer1 Capture Handler
+000005 9518      .org 0x005 reti;rjmp TIM1_CAPT ; Timer1 Capture Handler
+                 ; Timer1 CompareA Handler
+000006 9518      .org 0x006 reti;rjmp TIM1_COMPA ; Timer1 CompareA Handler
+                 ; Timer1 CompareB Handler
+000007 9518      .org 0x007 reti;rjmp TIM1_COMPB ; Timer1 CompareB Handler
+                 ; Timer1 Overflow Handler
+000008 9518      .org 0x008 reti;rjmp TIM1_OVF ; Timer1 Overflow Handler
+                 ; Timer0 Overflow Handler
+000009 c051      .org 0x009 rjmp TIM0_OVF ; Timer0 Overflow Handler
+                 ; SPI Transfer Complete Handler
+00000a 9518      .org 0x00a reti;rjmp SPI_STC ; SPI Transfer Complete Handler
+                 ; USART RX Complete Handler
+00000b 9518      .org 0x00b reti;rjmp USART_RXC ; USART RX Complete Handler
+                 ; UDR Empty Handler
+00000c 9518      .org 0x00c reti;rjmp USART_UDRE ; UDR Empty Handler
+                 ; USART TX Complete Handler
+00000d 9518      .org 0x00d reti;rjmp USART_TXC ; USART TX Complete Handler
+                 ; ADC Conversion Complete Handler
+00000e c092      .org 0x00e rjmp ADC_INT ; ADC Conversion Complete Handler
+                 ; EEPROM Ready Handler
+00000f c020      .org 0x00f rjmp EE_RDY ; EEPROM Ready Handler
+                 ; Analog Comparator Handler
+000010 9518      .org 0x010 reti;rjmp ANA_COMP ; Analog Comparator Handler
+                 ; Two-wire Serial Interface Handler
+000011 9518      .org 0x011 reti;rjmp TWSI ; Two-wire Serial Interface Handler
+                 ; Store Program Memory Ready Handler
+000012 9518      .org 0x012 reti;rjmp SPM_RDY ; Store Program Memory Ready Handler
+                 
+                 
+                 ;описание всех РОНов
+                 .def tmpL	= r16	;главный рабочий регистр(младший)
+                 .def tmpH	= r17	;главный рабочий регистр(старший)
+                 .def tmpL2	= r18	;вспомогательный рабочий регистр(младший)
+                 .def tmpH2	= r19	;вспомогательный рабочий регистр(старший)
+                 .def tmp1	= r20	;пользовательский 1 регистр
+                 .def tmp2	= r21	;пользовательский 1 регистр
+                 .def Flags	= r22	;регистр флагов
+                 .def DataL	= r23	;регистр данных(младший)
+                 .def DataH	= r24	;регистр данных(старший)
+                 .def cnt1	= r25	;главный счетчик регистр
+                 
+                 .def	cntADC = r15 ;какой замер проводим
+                 .def	cntLED = r14 ;какой разряд выводим
+                 
+                 // организуем подключение всех файлов проекта
+                 #include"DSEG.inc"		;файл резервирования переменных в ОЗУ и инициализация констант и таблиц
+                 
+                 ;** Файл резервирования переменных в ОЗУ и констант
+                 ;**
+                 ;**
+                 ;************************************
+                 ;************************************
+                 ; инициализируем необходимые названия для выводов
+                 
+                 ; данные семисегментного индикатора
+                 .set Seg_A = PB5
+                 .set Seg_B = PB4
+                 .set Seg_C = PB3
+                 .set Seg_D = PD6
+                 .set Seg_E = PB1
+                 .set Seg_F = PB2
+                 .set Seg_G = PB0
+                 .set Seg_DP = PD7
+                 ; управление семисегментником
+                 .equ v1 = PC4
+                 .equ v2 = PC5
+                 .equ v3 = PD0
+                 .equ a1 = PD1
+                 .equ a2 = PD2
+                 .equ a3 = PD3
+                 .equ a4 = PD4
+                 
+                 .equ ErrorAmper = PD5
+                 
+                 ;************************************
+                 ;выбор сегмента EEPROM
+                 .eseg
+                 .org	0x08
+                 
+                 
+                 ;************************************
+                 ;выбор сегмента ОЗУ
+                 .dseg
+                 .org 0x060
+                 
+                 
+000060           Atek:	.BYTE 1
+000061           Aerror:	.BYTE 1
+000062           VoltBig:	.BYTE 2
+000064           VoltSmall:	.BYTE 2
+000066           VoltBigS:	.BYTE 2
+000068           VoltSmallS:	.BYTE 2
+                 
+00006a           Amper:	.BYTE 2
+00006c           Vind: .BYTE 2
+00006e           Aind: .BYTE 2
+                 
+                 
+                 .equ cpiVoltBig = 40;/8
+                 .equ cpiVoltSmall = 32;/16
+                 .equ cpiAmper = 32;/4
+                 .equ VoltSmallMax = 1000;2816/100 = 28 Вольт, 10 это отступ на точность
+                 
+000070           cntVoltBig:	.BYTE 1
+000071           cntVoltSmall:	.BYTE 1
+000072           cntAmper:	.BYTE 1
+                 
+                 
+                 TableDataLed:
+000073           sV1:	.BYTE 1
+000074           sV2:	.BYTE 1
+000075           sV3:	.BYTE 1
+000076           sA1:	.BYTE 1
+000077           sA2:	.BYTE 1
+000078           sA3:	.BYTE 1
+000079           sA4:	.BYTE 1
+                 
+                 
+                 ;************************************
+                 
+                 
+                 ;************************************
+                 ; выбор сегмента памяти программ
+                 .cseg		
+                 
+                 
+                 ;************************************
+                 ; Константы семисегментного индикатора
+                 .equ g = 1		; Bit 0 - a, вес разряда 1
+                 .equ e = 2		; Bit 1 - b, вес разряда 2
+                 .equ f = 4		; Bit 2 - c, вес разряда 4
+                 .equ c = 8		; Bit 3 - d, вес разряда 8
+                 .equ b = 16		; Bit 4 - e, вес разряда 16
+                 .equ a = 32		; Bit 5 - f, вес разряда 32
+                 .equ d = 64		; Bit 6 - g, вес разряда 64
+                 .equ DP = 128	; Bit 7 - DP, вес разряда 128
+                 
+                 .equ Num0 = a+b+c+d+e+f	; цифра 0
+                 .equ Num1 = b+c			; цифра 1
+                 .equ Num2 = a+b+d+e+g	; цифра 2
+                 .equ Num3 = a+b+c+d+g	; цифра 3
+                 .equ Num4 = b+c+f+g		; цифра 4
+                 .equ Num5 = a+c+d+f+g	; цифра 5
+                 .equ Num6 = a+c+d+e+f+g	; цифра 6
+                 .equ Num7 = a+b+c		; цифра 7
+                 .equ Num8 = a+b+c+d+e+f+g	; цифра 8
+                 .equ Num9 = a+b+c+d+f+g; цифра 9
+                 
+                 ;Таблица констант для вывода цифр на семисегментный индикатор
+                 ; 0 1 2 3 4 5 6 7 8 9
+                 TableIndicator:
+000013 187e      .db Num0,Num1	;.db	0b00111111, 0b00000110
+000014 7973      .db Num2,Num3	;.db	0b01011011, 0b01001111
+000015 6d1d      .db Num4,Num5	;.db	0b01100110, 0b01101101
+000016 386f      .db Num6,Num7	;.db	0b01111101, 0b00000111
+000017 7d7f      .db Num8,Num9	;.db	0b01111111, 0b01101111
+                 
+                 
+                 .equ AddrV11 = 1<<PC4
+                 .equ AddrV12 = 0
+                 .equ AddrV21 = 1<<PC5
+                 .equ AddrV22 = 0
+                 .equ AddrV31 = 0
+                 .equ AddrV32 = 1<<PD0
+                 .equ AddrA11 = 0
+                 .equ AddrA12 = 1<<PD1
+                 .equ AddrA21 = 0
+                 .equ AddrA22 = 1<<PD2
+                 .equ AddrA31 = 0
+                 .equ AddrA32 = 1<<PD3
+                 .equ AddrA41 = 0
+                 .equ AddrA42 = 1<<PD4
+                 
+                 ; таблица адресов включения разрядов LED
+                 TableLed:
+000018 0010      .db AddrV11,AddrV12
+000019 0020      .db AddrV21,AddrV22
+00001a 0100      .db AddrV31,AddrV32
+00001b 0200      .db AddrA11,AddrA12
+00001c 0400      .db AddrA21,AddrA22
+00001d 0800      .db AddrA31,AddrA32
+00001e 1000      .db AddrA41,AddrA42
+                 
+                 
+                 ; таблица констант для включения правильных АЦП для снятия последовательно всех значений
+                 TableADC:
+00001f 0100
+000020 0302      .db 0x00,0x01,0x02,0x03
+                 
+                 
+                 
+                 
+                 
+                 
+                 #include"EEPROM.inc"	;файл работы с энергонезависимой памятью
+                 
+                 ;** Файл работы с энергонезависимой памятью
+                 ;**
+                 ;**
+                 ;************************************
+                 
+                 ;************************************
+                 ; запись данных в EEPROM
+                 
+                 EEPROM_write:
+                 ; Wait for completion of previous write
+000021 99e1      sbic EECR,EEWE
+000022 cffe      rjmp EEPROM_write
+                 ; Set up address (r18:r17) in address register
+000023 bb2f      out EEARH, r18
+000024 bb1e      out EEARL, r17
+                 ; Write data (r16) to data register
+000025 bb0d      out EEDR,r16
+                 ; Write logical one to EEMWE
+000026 9ae2      sbi EECR,EEMWE
+                 ; Start eeprom write by setting EEWE
+000027 9ae1      sbi EECR,EEWE
+000028 9508      ret
+                 ;************************************
+                 ;чтение данных из EEPROM
+                 EEPROM_read:
+                 ; Wait for completion of previous write
+000029 99e1      sbic EECR,EEWE
+00002a cffe      rjmp EEPROM_read
+                 ; Set up address (r18:r17) in address register
+00002b bb2f      out EEARH, r18
+00002c bb1e      out EEARL, r17
+                 ; Start eeprom read by writing EERE
+00002d 9ae0      sbi EECR,EERE
+                 ; Read data from data register
+00002e b30d      in r16,EEDR
+00002f 9508      ret
+                 ;************************************
+                 
+                 EE_RDY:
+                 
+000030 9518      		reti
+                 #include"RESET.inc" 	;файл инициализации(сброса)
+                 
+                 ;**
+                 ;**
+                 ;**
+                 ;************************************
+                 
+                 ; первоначальный сброс
+                 RESET:
+                 ; запрещаем прерывания
+000031 94f8      	cli
+                 
+                 ;************************************
+                 ;	инициализация стека
+000032 e004      		ldi r16,high(RAMEND) ; Main program start
+000033 bf0e      		out SPH,r16 ; Set stack pointer to top of RAM
+000034 e50f      		ldi r16,low(RAMEND)
+000035 bf0d      		out SPL,r16
+                 ;************************************
+                 
+                 ;************************************
+                 
+                 	;Port Pin Configurations
+                 	;DDxn     PORTxn	PUD (in 
+                 	;					MCUCR2)         I/O        Pull-up     	Comment
+                 	;0 			0 		X 				Input      No        	Tri-state (Hi-Z)
+                 	;0 			1 		0 				Input      Yes			Pxn will source current if ext. pulled low.
+                 	;0 			1 		1 				Input      No        	Tri-state (Hi-Z)
+                 	;1 			0 		X 				Output     No	        Output Low (Sink)
+                 	;1 			1 		X 				Output     No        	Output High (Source)
+                 	
+                 ;-------------------------- Инициализация Порта ввода/вывода B
+                 
+000036 e30f      		ldi		r16, 0x3F	; Записываем число $00 в регистр temp
+000037 bb07      		out		DDRB, r16	; Записываем это число в DDRС
+000038 e000      		ldi		r16, 0x00	; Записываем число $00 в регистр temp
+000039 bb08      		out		PORTB, r16	; Записываем то  же число в PORTС
+                 
+00003a e300      		ldi		r16, 0x30	; Записываем число $00 в регистр temp
+00003b bb04      		out		DDRC, r16	; Записываем это число в DDRС
+00003c e000      		ldi		r16, 0x00	; Записываем число $00 в регистр temp
+00003d bb05      		out		PORTC, r16	; Записываем то  же число в PORTС
+                 
+00003e ef0f      		ldi		r16, 0xFF	; Записываем число $00 в регистр temp
+00003f bb01      		out		DDRD, r16	; Записываем это число в DDRС
+000040 e000      		ldi		r16, 0x00	; Записываем число $00 в регистр temp
+000041 bb02      		out		PORTD, r16	; Записываем то  же число в PORTС
+                 
+                 ;************************************
+                 
+                 ;-------------------------- Инициализация компаратора
+                 ; отключаем аналоговый компаратор для энерго сбережения
+000042 e800      		ldi r16, 0x80		; выключение компаратора
+000043 b908      		out ACSR, r16
+                 
+                 ;**********************************
+                 ;**********************************
+000044 e005      	ldi r16, 1<<CS02|0<<CS01|1<<CS00
+000045 bf03      	out TCCR0,r16
+                 
+000046 e001      	ldi r16, 1<<TOIE0
+000047 bf09      	out TIMSK,r16
+                 
+000048 eb02      	ldi r16, (-78)
+000049 bf02      	out TCNT0,r16
+                 
+                 ;**********************************
+                 ;опорное на 2,54В внешнее, подключаем АналогВход 0(РС0),нормирование на младший байт
+00004a e000      	 ldi r16,0<<REFS1|0<<REFS0|0<<MUX2|0<<MUX1|0<<MUX0|0<<ADLAR
+00004b b907      	 out ADMUX,r16
+                 ;разрешим работу АЦП, разрешим прерывание, делитель на 32
+00004c e80f      	 ldi r16, 1<<ADEN|1<<ADIE|0<<ADFR|1<<ADPS2|1<<ADPS1|1<<ADPS0
+00004d b906      	 out ADCSRA,r16
+                 
+                 ;************************************
+                 	;Watchdog Timer Control Register - WDTCSR
+                 	;7		6		5		4		3		2		1		0
+                 	;WDIF   WDIE    WDP3    WDCE    WDE     WDP2    WDP1    WDP0  
+                 	; Bit 7 - WDIF: Watchdog Interrupt Flag
+                 	; Bit 6 - WDIE: Watchdog Interrupt Enable
+                 	; Bit 4 - WDCE: Watchdog Change Enable
+                 	; Bit 3 - WDE: Watchdog System Reset Enable
+                 	; Bit 5, 2..0 - WDP3..0: Watchdog Timer Prescaler 3, 2, 1 and 0
+                 	;WDTON(1)	WDE WDIE    Mode 					Action on Time-out
+                 	;	1 		0 	0 		Stopped 				None
+                 	;	1 		0 	1 		Interrupt Mode 			Interrupt
+                 	;	1 		1 	0 		System Reset Mode 		Reset
+                 	;	1 		1 	1		Interrupt and System 	Interrupt, then go to
+                 	;						Reset Mode				System Reset Mode
+                 	;	0 		x 	x 		System Reset Mode 		Reset
+                 	;Note:      1.  WDTON Fuse set to “0“ means programmed and “1” means unprogrammed.
+                 	;WDP3     WDP2     WDP1     WDP0	Number of WDT Oscillator 	Typical Time-out at
+                 	;									Cycles						VCC = 5.0V
+                 	;	0 		0 		0 		0 		2K (2048) cycles 			16 ms
+                 	;	0 		0 		0 		1 		4K (4096) cycles 			32 ms
+                 	;	0 		0 		1 		0 		8K (8192) cycles 			64 ms
+                 	;	0 		0 		1 		1 		16K (16384) cycles 			0.125 s
+                 	;	0 		1 		0 		0 		32K (32768) cycles 			0.25 s
+                 	;	0 		1 		0	 	1 		64K (65536) cycles 			0.5 s
+                 	;	0 		1 		1 		0 		128K (131072) cycles 		1.0 s
+                 	;	0 		1 		1 		1 		256K (262144) cycles 		2.0 s
+                 	;	1 		0 		0 		0 		512K (524288) cycles 		4.0 s
+                 	;	1 		0 		0 		1 		1024K (1048576) cycles 		8.0 s
+                 ;--------------------------- Выключение сторожевого таймера
+                 WDT_off:
+                 ; Turn off global interrupt
+00004e 94f8      cli
+                 ; Reset Watchdog Timer
+00004f 95a8      wdr
+                 ; Clear WDRF in MCUSR
+000050 b704      in    r16, MCUSR
+000051 7f07      andi  r16, (0xff - (1<<WDRF))
+000052 bf04      out   MCUSR, r16
+                 ; Write logical one to WDCE and WDE
+                 ; Keep old prescaler setting to prevent unintentional time-out
+000053 b501      in    r16, WDTCR
+000054 6108      ori   r16, (1<<WDCE) | (1<<WDE)
+000055 bd01      out   WDTCR, r16
+                 ; Turn off WDT
+000056 e000      ldi   r16, (0<<WDE)
+000057 bd01      out   WDTCR, r16
+                 
+                 ;************************************
+                 
+000058 c190      rjmp main
+                 ;#include"EXT_INT.inc"	;файл обработки внешних прерываний
+                 ;#include"PCINT.inc"		;файл работы с прерываниями ввода/вывода
+                 #include"TIM0.inc"		;файл работы с Таймером0
+                 
+                 ;**
+                 ;**
+                 ;**
+                 ;************************************
+                 
+                 TIM0_COMPA:
+                 
+000059 9518      		reti
+                 
+                 TIM0_COMPB:
+                 
+00005a 9518      		reti
+                 
+                 TIM0_OVF:
+00005b 93ef      	push zl
+00005c 93ff      	push zh
+00005d 930f      	push R16
+00005e 931f      	push R17
+00005f b70f      	in r16,SREG
+000060 930f      	push r16
+                 		
+                 ; переинициализация таймера
+000061 ef0b      	ldi r16, -5;20;
+000062 bf02      	out TCNT0,r16
+                 ;проверим все ли индикаторы мы обновили, бегаем по кругу
+                 ; у нас 7 разрядов на каждый по 2 адреса
+000063 2d0e      	mov r16,cntLed
+000064 3007      	cpi r16,7
+000065 f409      	brne normCntLed
+                 
+                 clearCntLed:
+000066 24ee      	clr cntLed
+                 
+                 normCntLed:
+                 ;************
+                 ; выставим данные на LED
+000067 e7e3      	ldi zl,low(TableDataLed)
+000068 e0f0      	ldi zh,high(TableDataLed)
+000069 2700      	clr r16
+00006a 0dee      	add zl,cntLed
+00006b 1ff0      	adc zh,r16
+                 
+                 ; работа по первому порту
+00006c 8110      	ld r17,Z
+00006d b308      	in r16,PORTB
+00006e 7c00      	andi r16,~(0x3F)
+00006f 731f      	andi r17,(0x3F)
+000070 2b01      	or r16,r17
+000071 bb08      	out PORTB,r16
+                 ; работа по второму порту
+000072 8110      	ld r17,Z
+000073 b302      	in r16,PORTD
+000074 720f      	andi r16,~(0xd0)
+000075 7d10      	andi r17,(0xd0)
+000076 2b01      	or r16,r17
+000077 bb02      	out PORTD,r16
+                 
+                 ;************
+                 ; выставим адресс разряда
+000078 e3e0      	ldi zl,low(2*TableLed)
+000079 e0f0      	ldi zh,high(2*TableLed)
+00007a 9488      	clc
+00007b 2d0e      	mov r16,cntLed
+00007c 0f00      	lsl r16
+00007d 0fe0      	add zl,r16
+00007e 2700      	clr r16
+00007f 1ff0      	adc zh,r16
+                 
+                 ; работа по первому адрессу
+000080 b305      	in r16,PORTC
+000081 7c0f      	andi r16,~(0x30)
+000082 9115      	lpm r17,Z+
+000083 7310      	andi r17,(0x30)
+000084 2b01      	or r16,r17
+000085 bb05      	out PORTC,r16
+                 
+                 ; работа по второму адрессу
+000086 b302      	in r16,PORTD
+000087 7e00      	andi r16,~(0x1F)
+000088 9114      	lpm r17,Z
+000089 711f      	andi r17,(0x1F)
+00008a 2b01      	or r16,r17
+00008b bb02      	out PORTD,r16
+                 ; инкрементируем счетчик указывающий на следующий разряд
+00008c 94e3      	inc cntLed
+                 
+                 extTIM0_OVF:
+                 
+                 
+                 ; смена канала АЦП
+00008d e3ee      	ldi zl,low(2*TableADC)
+00008e e0f0      	ldi zh,high(2*TableADC)
+00008f 0def      	add zl,cntADC
+000090 2722      	clr r18
+000091 1ff2      	adc zh,r18
+000092 9104      	lpm r16,Z
+                 
+000093 b127      	in r18,ADMUX
+000094 7f20      	andi r18,0xF0
+000095 2b20      	or r18,r16
+000096 b927      	out ADMUX,r18	
+                 
+                 ; запуск АЦП, если работаем в единичном преобразовании
+000097 b106      	in r16,ADCSRA
+000098 6400      	ori r16,1<<ADSC
+000099 b906      	out ADCSRA,r16
+                 	
+                 	
+00009a 913f      	pop r19
+00009b 912f      	pop r18
+00009c 911f      	pop r17
+00009d 910f      	pop r16
+00009e bf0f      	out SREG,r16
+00009f 910f      	pop r16
+                 
+0000a0 9518      	reti
+                 ;*******************************
+                 ;*******************************
+                 #include"ADC_INT.inc"	;файл работы с АЦП
+                 
+                 ;**
+                 ;**
+                 ;**
+                 ;************************************
+                 
+                 
+                 ADC_INT:
+0000a1 930f      push r16
+0000a2 b70f      in r16,SREG
+0000a3 930f      push r16
+0000a4 931f      push r17
+0000a5 932f      push r18
+0000a6 933f      push r19
+                 
+                 ; считываем полученные данные
+0000a7 b104      	in r16,ADCL
+0000a8 b115      	in r17,ADCH
+                 
+0000a9 eaef      	ldi zl,low(ADC_Conv)
+0000aa e0f0      	ldi zh,high(ADC_Conv)
+0000ab 0def      	add zl,cntADC
+0000ac 2722      	clr r18
+0000ad 1ff2      	adc zh,r18
+0000ae 9409      	ijmp
+                 
+                 ADC_Conv:
+0000af c00f      	rjmp sAerror
+0000b0 c034      	rjmp sVoltBig
+0000b1 c05f      	rjmp sVoltSmall
+0000b2 c086      	rjmp sAtek
+                 	
+                 testAmper:
+                 ; организуем проверку мгновенных значений уставки тока и текущего тока
+0000b3 9100 0060 	lds r16,Atek
+0000b5 9110 0061 	lds r17,Aerror
+0000b7 1701      	cp r16,r17
+0000b8 f418      	brsh ErrorAmp
+                 ; ток не превышает уставки
+0000b9 9a8d      	sbi DDRD,ErrorAmper
+0000ba 9895      	cbi PORTD,ErrorAmper
+0000bb 9508      	ret
+                 
+                 ErrorAmp:
+                 ; ток превышает уставку
+0000bc 9a8d      	sbi DDRD,ErrorAmper
+0000bd 9a95      	sbi PORTD,ErrorAmper
+0000be 9508      	ret
+                 
+                 sAerror:
+                 ;выделяем мгновенное значение
+0000bf 9516      	lsr r17
+0000c0 9507      	ror r16
+0000c1 9516      	lsr r17
+0000c2 9507      	ror r16
+                 	
+0000c3 9300 0061 	sts Aerror,r16
+                 
+0000c5 dfed      	rcall testAmper
+0000c6 d044      rcall ChannelInc
+                 
+0000c7 c0a3      	rjmp extADC_INT
+                 
+                 testVolt:
+                 
+0000c8 9100 0068 lds r16,VoltSmallS
+0000ca 9110 0069 lds r17,VoltSmallS+1
+                 ; проверим не подошли ли мы к верхнему пределу по малому напряжению
+0000cc ee28      ldi r18,low(VoltSmallMax)
+0000cd e033      ldi r19,high(VoltSmallMax)
+0000ce 1720      cp	r18,r16
+0000cf 0731      cpc	r19,r17
+0000d0 f420      brsh normVolt
+                 ; подошли? значит выводим по большому напряжению
+0000d1 9100 0066 lds r16,VoltBigS
+0000d3 9110 0067 lds r17,VoltBigS+1
+                 normVolt:
+                 
+0000d5 2f20      mov r18,r16
+0000d6 2f31      mov r19,r17
+                 
+                 
+                 ;усредним значения
+0000d7 9100 006e lds r16,Aind
+0000d9 9110 006f lds r17,Aind+1
+0000db 0f20      add r18,r16
+0000dc 1f31      adc r19,r17
+                 
+0000dd 9536      lsr r19
+0000de 9527      ror r18
+                 
+0000df 9320 006c 	sts Vind,r18
+0000e1 9330 006d 	sts Vind+1,r19
+                 
+                 ;ldi r18,low(12345)
+                 ;ldi r19,high(12345)
+                 
+0000e3 d0e2      rcall NumberV
+                 
+0000e4 9508      	ret
+                 
+                 sVoltBig:
+                 ; накапливаем значения по напряжению большому
+0000e5 9120 0062 	lds r18,VoltBig
+0000e7 9130 0063 	lds r19,VoltBig+1
+0000e9 0f20      	add r18,r16
+0000ea 1f31      	adc r19,r17
+                 
+0000eb 9320 0062 	sts VoltBig,r18
+0000ed 9330 0063 	sts VoltBig+1,r19
+                 
+                 ;проверим счетчик накопления
+0000ef 9100 0070 	lds r16,cntVoltBig
+0000f1 9503      	inc r16
+0000f2 9300 0070 	sts cntVoltBig,r16
+                 
+0000f4 3208      	cpi r16,cpiVoltBig
+0000f5 f4a1      	brne extADC_INT1
+                 
+                 ;/8
+0000f6 9536      lsr r19
+0000f7 9527      ror r18
+0000f8 9536      lsr r19
+0000f9 9527      ror r18
+0000fa 9536      lsr r19
+0000fb 9527      ror r18
+                 
+                 
+0000fc 9320 0066 	sts VoltBigS,r18
+0000fe 9330 0067 	sts VoltBigS+1,r19
+                 
+000100 2700      	clr r16
+000101 9300 0070 	sts cntVoltBig,r16
+                 
+000103 dfc4      	rcall testVolt
+                 
+000104 2700      	clr r16
+000105 9300 0062 	sts VoltBig,r16
+000107 9300 0063 	sts VoltBig+1,r16
+000109 d001      rcall ChannelInc
+                 
+                 extADC_INT1:
+00010a c060      	rjmp extADC_INT
+                 
+                 
+                 ChannelInc:
+                 ; указываем на следующий канал
+00010b 94f3      	inc cntADC
+                 
+                 ; проверим все ли каналы опросили
+                 ; бегаем по кругу ,всего 4е канала
+00010c 2d0f      	mov r16,cntADC
+00010d 3004      	cpi r16,4
+00010e f409      	brne normADC
+                 clearCntADC:
+00010f 24ff      	clr cntADC
+                 normADC:
+                 
+000110 9508      ret
+                 
+                 
+                 
+                 sVoltSmall:
+                 ; накапливаем значения по напряжению малому
+000111 9120 0064 	lds r18,VoltSmall
+000113 9130 0065 	lds r19,VoltSmall+1
+000115 0f20      	add r18,r16
+000116 1f31      	adc r19,r17
+                 
+000117 9320 0064 	sts VoltSmall,r18
+000119 9330 0065 	sts VoltSmall+1,r19
+                 
+                 ;проверим счетчик накопления
+00011b 9100 0071 	lds r16,cntVoltSmall
+00011d 9503      	inc r16
+00011e 9300 0071 	sts cntVoltSmall,r16
+                 
+000120 3200      	cpi r16,cpiVoltSmall
+000121 f741      	brne extADC_INT1
+                 
+000122 2700      	clr r16
+000123 9300 0071 	sts cntVoltSmall,r16
+                 
+                 ;/16
+000125 9536      lsr r19
+000126 9527      ror r18
+000127 9536      lsr r19
+000128 9527      ror r18
+000129 9536      lsr r19
+00012a 9527      ror r18
+00012b 9536      lsr r19
+00012c 9527      ror r18
+                 
+00012d 9320 0068 	sts VoltSmallS,r18
+00012f 9330 0069 	sts VoltSmallS+1,r19
+                 
+000131 df96      	rcall testVolt
+                 
+000132 2700      	clr r16
+000133 9300 0064 	sts VoltSmall,r16
+000135 9300 0065 	sts VoltSmall+1,r16
+000137 dfd3      rcall ChannelInc
+                 
+000138 c032      	rjmp extADC_INT
+                 
+                 sAtek:
+                 ; накапливаем значения по току
+000139 9120 006a 	lds r18,Amper
+00013b 9130 006b 	lds r19,Amper+1
+00013d 0f20      	add r18,r16
+00013e 1f31      	adc r19,r17
+                 
+00013f 9320 006a 	sts Amper,r18
+000141 9330 006b 	sts Amper+1,r19
+                 ;выделяем мгновенное значение
+000143 9516      	lsr r17
+000144 9507      	ror r16
+000145 9516      	lsr r17
+000146 9507      	ror r16
+                 	
+000147 9300 0060 	sts Atek,r16
+                 
+000149 df69      	rcall testAmper
+                 
+                 ;проверим счетчик накопления
+00014a 9100 0072 	lds r16,cntAmper
+00014c 9503      	inc r16
+00014d 9300 0072 	sts cntAmper,r16
+                 
+00014f 3200      	cpi r16,cpiAmper
+000150 f4d1      	brne extADC_INT
+                 
+                 ;/4
+000151 9536      lsr r19
+000152 9527      ror r18
+000153 9536      lsr r19
+000154 9527      ror r18
+                 
+                 ;усредним значения
+000155 9100 006e lds r16,Aind
+000157 9110 006f lds r17,Aind+1
+000159 0f20      add r18,r16
+00015a 1f31      adc r19,r17
+                 
+00015b 9536      lsr r19
+00015c 9527      ror r18
+                 
+00015d 9320 006e 	sts Aind,r18
+00015f 9330 006f 	sts Aind+1,r19
+                 
+                 ;ldi r18,low(12345)
+                 ;ldi r19,high(12345)
+                 
+000161 d04d      rcall NumberA
+                 
+000162 2700      	clr r16
+000163 9300 0072 	sts cntAmper,r16
+000165 9300 006a 	sts Amper,r16
+000167 9300 006b 	sts Amper+1,r16
+000169 dfa1      rcall ChannelInc
+                 
+00016a c000      	rjmp extADC_INT
+                 
+                 
+                 extADC_INT:
+                 
+                 
+                 
+00016b 913f      pop r19
+00016c 912f      pop r18
+00016d 911f      pop r17
+00016e 910f      pop r16
+00016f bf0f      out SREG,r16
+000170 910f      pop r16	
+                 
+000171 9518      	reti
+                 ;#include"ANA_COMP.inc"	;файл работы с Аналоговым компоратором
+                 
+                 #include"Delay.inc"		;файл организации задержек
+                 
+                 ;** Файл организациии задержек программным способом
+                 ;**
+                 ;**
+                 ;************************************
+                 
+                 ;Формула данной задержки
+                 ;(3*R20+5)*R19+10
+                 ; R20=165
+                 ; r19 =0 128010 тактов
+                 ; r19 =1 510 тактов
+                 ; r19 =2 1010 татов
+                 Delay:
+000172 934f      	push r20
+                 loop0:
+000173 ea45      	ldi r20,0xA5
+                 loop1:
+000174 954a      	dec r20
+000175 f7f1      	brne loop1
+000176 0000      	nop
+000177 0000      	nop
+000178 941a      	dec r1
+000179 f7c9      	brne loop0
+                 
+00017a 914f      	pop r20
+00017b 9508      	ret
+                 
+                 ;************************************
+                 ;Небольшая задержка в 500 тактов
+                 ;Формула 12+4*R16
+                 ;При 122 задержка в 500 тактов что соответствует 0,5мсек при 1Мгц
+                 DelaySmall:
+00017c 930f      		push r16
+00017d e70a      		ldi r16, 122
+                 delay_loop:
+00017e 0000      		nop
+00017f 950a      		dec r16
+000180 f7e9      		brne delay_loop
+000181 0000      		nop
+000182 910f      		pop r16
+000183 9508      		ret
+                 ;************************************
+                 ;Небольшая задержка в микросекундах
+                 ;Формула 7+10*2*R16
+                 ;При 1 задержка в 2007 тактов что соответствует 100,35мксек при 20Мгц
+                 delay_mcs:
+                 usDelay:
+000184 0f22      		lsl r18
+                 delay_us:
+000185 0000      		nop
+000186 0000      		nop
+000187 0000      		nop
+000188 0000      		nop
+000189 0000      		nop
+00018a 0000      		nop
+00018b 0000      		nop
+00018c 952a      		dec r18
+00018d f7b9      		brne delay_us
+00018e 9508      		ret
+                 ;************************************
+                 ;формула данной подпрограммы задержки
+                 ;((3*R20+3)*R21+4)*R22+20)
+                 ;
+                 ; пару примеров
+                 ;	для 1000000 тактов   100 165  20
+                 ;	для 2000000 тактов	  45 161  90	
+                 ;	для  500000 тактов	 223 248   3
+                 ;	для 6000000 тактов	 135 173  85
+                 ;	для 8000000 тактов	  95 224 124
+                 DelayLong:
+00018f 934f      	push r20
+000190 935f      	push r21
+000191 936f      	push r22
+                 
+000192 e164      	ldi r22, 20
+                 loopL2:
+000193 ea55      	ldi r21, 165
+                 loopL1:
+000194 e644      	ldi r20,100
+                 loopL0:
+000195 954a      	dec r20
+000196 f7f1      	brne loopL0
+000197 955a      	dec r21
+000198 f7d9      	brne LoopL1
+000199 0000      	nop
+00019a 956a      	dec r22
+00019b f7b9      	brne LoopL2
+                 
+00019c 0000      	nop
+00019d 916f      	pop r22
+00019e 915f      	pop r21
+00019f 914f      	pop r20
+0001a0 9508      	ret
+                 ;************************************
+                 ;формула данной подпрограммы задержки
+                 ;((3*R20+3)*R21+4)*R22+14)
+                 ;
+                 ; пару примеров
+                 ;	247 26 1 = 20025 тактов или 1 мсек при 20 МГц
+                 
+                 delay_ms:
+                 msDelay:
+0001a1 934f      	push r20
+0001a2 933f      	push r19
+                 	
+                 loopL20:
+0001a3 ef37      	ldi r19, 247
+                 loopL10:
+0001a4 e15a      	ldi r21,26
+                 loopL00:
+0001a5 955a      	dec r21
+0001a6 f7f1      	brne loopL00
+0001a7 953a      	dec r19
+0001a8 f7d9      	brne LoopL10
+0001a9 0000      	nop
+0001aa 952a      	dec r18
+0001ab f7b9      	brne LoopL20
+                 
+0001ac 913f      	pop r19
+0001ad 914f      	pop r20
+0001ae 9508      	ret
+                 #include"SubRouters.inc";файл некоторых ходовых подпрограмм
+                 
+                 ;** Файл вспомогательных подпрограмм
+                 ;**
+                 ;**
+                 ;************************************
+                 
+                 		;-------------------------- Подпрограммы
+                 
+                 ;пример подпрограммы подготовки данных на вывод
+                 ; будь то температура, напряжение, значение тока или другая цифровая информация(не буквенная)
+                 ; при необходимости отображать признак точки он должен быть добавлен к извлеченной константе
+                 
+                 
+                 NumberA:
+                 ; подпрограмма определения цифр для отображения
+                 ; рабочий байт передаеться из 
+                 ;	tmpL2 это младший байт
+                 ; 	tmpH2 это старший байт
+                 		
+0001af e100      		ldi tmpL, low(10000)
+0001b0 e217      		ldi tmpH, high(10000)
+0001b1 d029      		rcall digit
+0001b2 2d00      		mov r16,r0
+0001b3 6800      		ori r16,DP
+0001b4 9300 0076 		sts sA1, r16
+                 
+0001b6 ee08      		ldi tmpL, low(1000)
+0001b7 e013      		ldi tmpH, high(1000)
+0001b8 d022      		rcall digit
+0001b9 9200 0077 		sts sA2, r0
+                 
+0001bb e604      		ldi tmpL, low(100)
+0001bc e010      		ldi tmpH, high(100)
+0001bd d01d      		rcall digit
+0001be 9200 0078 		sts sA3, r0
+                 		
+0001c0 e00a      		ldi tmpL, low(10)
+0001c1 e010      		ldi tmpH, high(10)
+0001c2 d018      		rcall digit
+                 ;		mov cnt1, tmpL2
+                 ;		rcall number_init
+0001c3 9200 0079 		sts sA4, r0
+                 		
+0001c5 9508      		ret;
+                 
+                 NumberV:
+                 ; подпрограмма определения цифр для отображения
+                 ; рабочий байт передаеться из 
+                 ;	tmpL2 это младший байт
+                 ; 	tmpH2 это старший байт
+                 		
+0001c6 e100      		ldi tmpL, low(10000)
+0001c7 e217      		ldi tmpH, high(10000)
+0001c8 d012      		rcall digit
+                 ;		sts sV1, r0
+                 
+0001c9 ee08      		ldi tmpL, low(1000)
+0001ca e013      		ldi tmpH, high(1000)
+0001cb d00f      		rcall digit
+0001cc 9200 0073 		sts sV1, r0
+                 
+0001ce e604      		ldi tmpL, low(100)
+0001cf e010      		ldi tmpH, high(100)
+0001d0 d00a      		rcall digit
+0001d1 2d00      		mov r16,r0
+0001d2 6800      		ori r16,DP
+0001d3 9300 0074 		sts sV2, r16
+                 
+0001d5 e00a      		ldi tmpL, low(10)
+0001d6 e010      		ldi tmpH, high(10)
+0001d7 d003      		rcall digit
+0001d8 9200 0075 		sts sV3, r0
+                 		
+0001da 9508      		ret;
+                 ;
+                 ; подпрограмма разложения числа на разряды
+0001db ef4f      digit:	ldi r20, -1	; сразу инициализируем -1
+0001dc 9543      digit_1:inc r20		; инкрементируем, т.е. впервый раз начинаем с нуля!!!
+0001dd 1b20      		sub r18, r16	; вычитание младшего байта
+0001de 0b31      		sbc r19, r17	; вычитание с переносом старшего байта
+0001df f7e0      		brsh digit_1	; в случае коль не отрицательное повторить
+0001e0 0f20      		add r18, r16	; иначе восстанавливаем последнее значение
+0001e1 1f31      		adc r19, r17	; в итоге остается все что меньше вычитаемого
+                 						; т.е. вычитая 10 остаток единицы!!!
+                 
+0001e2 e0f0      		ldi zh, high(TableIndicator*2)
+0001e3 e2e6      		ldi zl, low(TableIndicator*2)
+0001e4 0fe4      		add zl, r20
+0001e5 2744      		clr r20
+0001e6 1ff4      		adc zh, r20
+0001e7 95c8      		lpm	; результат в R0
+0001e8 9508      		ret
+                 
+                 ;*******************************
+                 
+                 
+                 //организуем бесконечный цикл
+                 main:
+                 ; запуск АЦП
+0001e9 b106      	in r16,ADCSRA
+0001ea 6400      	ori r16,1<<ADSC
+0001eb b906      	out ADCSRA,r16
+                 
+                 
+0001ec 2700      	clr r16
+0001ed 9300 0064 	sts VoltSmall,r16
+0001ef 9300 0065 	sts VoltSmall+1,r16
+0001f1 9300 0062 	sts VoltBig,r16
+0001f3 9300 0063 	sts VoltBig+1,r16
+0001f5 9300 006a 	sts Amper,r16
+0001f7 9300 006b 	sts Amper+1,r16
+0001f9 9300 0070 	sts cntVoltBig,r16
+0001fb 9300 0071 	sts cntVoltSmall,r16
+0001fd 9300 0072 	sts cntAmper,r16
+0001ff 9300 0060 	sts Atek,r16
+000201 9300 0061 	sts Aerror,r16
+                 
+                 
+000203 9478      sei	; enable global interrupt
+                 mainWork:
+000204 0000      		nop
+                 
+000205 cffe      		rjmp mainWork
+
+
+RESOURCE USE INFORMATION
+------------------------
+
+Notice:
+The register and instruction counts are symbol table hit counts,
+and hence implicitly used resources are not counted, eg, the
+'lpm' instruction without operands implicitly uses r0 and z,
+none of which are counted.
+
+x,y,z are separate entities in the symbol table and are
+counted separately from r26..r31 here.
+
+.dseg memory usage only counts static data declared with .byte
+
+ATmega8 register use summary:
+r0 :   7 r1 :   1 r2 :   0 r3 :   0 r4 :   0 r5 :   0 r6 :   0 r7 :   0 
+r8 :   0 r9 :   0 r10:   0 r11:   0 r12:   0 r13:   0 r14:   5 r15:   5 
+r16: 165 r17:  46 r18:  47 r19:  38 r20:  15 r21:   6 r22:   4 r23:   0 
+r24:   0 r25:   0 r26:   0 r27:   0 r28:   0 r29:   0 r30:  11 r31:  11 
+x  :   0 y  :   0 z  :   5 
+Registers used: 14 out of 35 (40.0%)
+
+ATmega8 instruction use summary:
+adc   :  11 add   :  11 adiw  :   0 and   :   0 andi  :  10 asr   :   0 
+bclr  :   0 bld   :   0 brbc  :   0 brbs  :   0 brcc  :   0 brcs  :   0 
+breq  :   0 brge  :   0 brhc  :   0 brhs  :   0 brid  :   0 brie  :   0 
+brlo  :   0 brlt  :   0 brmi  :   0 brne  :  15 brpl  :   0 brsh  :   3 
+brtc  :   0 brts  :   0 brvc  :   0 brvs  :   0 bset  :   0 bst   :   0 
+cbi   :   1 cbr   :   0 clc   :   1 clh   :   0 cli   :   2 cln   :   0 
+clr   :  13 cls   :   0 clt   :   0 clv   :   0 clz   :   0 com   :   0 
+cp    :   2 cpc   :   1 cpi   :   5 cpse  :   0 dec   :  10 eor   :   0 
+fmul  :   0 fmuls :   0 fmulsu:   0 icall :   0 ijmp  :   1 in    :  14 
+inc   :   6 ld    :   2 ldd   :   0 ldi   :  52 lds   :  19 lpm   :   4 
+lsl   :   2 lsr   :  15 mov   :   7 movw  :   0 mul   :   0 muls  :   0 
+mulsu :   0 neg   :   0 nop   :  15 or    :   5 ori   :   5 out   :  32 
+pop   :  17 push  :  17 rcall :  18 ret   :  14 reti  :  20 rjmp  :  16 
+rol   :   0 ror   :  15 sbc   :   1 sbci  :   0 sbi   :   6 sbic  :   2 
+sbis  :   0 sbiw  :   0 sbr   :   0 sbrc  :   0 sbrs  :   0 sec   :   0 
+seh   :   0 sei   :   1 sen   :   0 ser   :   0 ses   :   0 set   :   0 
+sev   :   0 sez   :   0 sleep :   0 spm   :   0 st    :   0 std   :   0 
+sts   :  46 sub   :   1 subi  :   0 swap  :   0 tst   :   0 wdr   :   1 
+
+Instructions used: 41 out of 108 (38.0%)
+
+ATmega8 memory use summary [bytes]:
+Segment   Begin    End      Code   Data   Used    Size   Use%
+---------------------------------------------------------------
+[.cseg] 0x000000 0x00040c   1008     28   1036    8192  12.6%
+[.dseg] 0x000060 0x00007a      0     26     26    1024   2.5%
+[.eseg] 0x000000 0x000008      0      0      0     512   0.0%
+
+Assembly complete, 0 errors, 0 warnings
