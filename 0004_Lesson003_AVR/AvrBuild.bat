@@ -1,0 +1,2 @@
+@ECHO OFF
+"C:\Program Files\Atmel\AVR Tools\AvrAssembler2\avrasm2.exe" -S "C:\FPC\Lesson003_AVR\labels.tmp" -fI -W+ie -o "C:\FPC\Lesson003_AVR\Lesson003_AVR_ASM.hex" -d "C:\FPC\Lesson003_AVR\Lesson003_AVR_ASM.obj" -e "C:\FPC\Lesson003_AVR\Lesson003_AVR_ASM.eep" -m "C:\FPC\Lesson003_AVR\Lesson003_AVR_ASM.map" -l "C:\FPC\Lesson003_AVR\Lesson003_AVR_ASM.lst" "C:\FPC\Lesson003_AVR\Lesson003_AVR_ASM.asm"
