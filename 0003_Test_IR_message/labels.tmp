@@ -1,0 +1,37 @@
+<ASSEMBLER_INFO>
+ <VERSION>2.1.12</VERSION>
+ <DEVICE>ATmega8</DEVICE>
+ <WORKING_DIR>C:\FPC\Work_AVR\Test_IR_message</WORKING_DIR>
+ <INCLUDE_PATH>
+  <DIR>C:\Program Files\Atmel\AVR Tools\AvrAssembler2\Appnotes</DIR>
+ </INCLUDE_PATH>
+ <SOURCE_FILE>C:\FPC\Work_AVR\Test_IR_message\Test_IR_message.asm</SOURCE_FILE>
+ <INCLUDED_FILES>
+  <FILE>C:\Program Files\Atmel\AVR Tools\AvrAssembler2\Appnotes\m8def.inc</FILE>
+ </INCLUDED_FILES>
+ <OBJECT_FILES>
+  <FILE>C:\FPC\Work_AVR\Test_IR_message\Test_IR_message.obj</FILE>
+ </OBJECT_FILES>
+ <HEX_FILES>
+  <FILE>C:\FPC\Work_AVR\Test_IR_message\Test_IR_message.hex</FILE>
+ </HEX_FILES>
+ <OUTPUT_FILES>
+  <FILE>C:\FPC\Work_AVR\Test_IR_message\Test_IR_message.map</FILE>
+ </OUTPUT_FILES>
+ <LABELS>
+  <RESET><FILE>C:\FPC\Work_AVR\Test_IR_message\Test_IR_message.asm</FILE><LINE>55</LINE></RESET>
+  <WDT_off><FILE>C:\FPC\Work_AVR\Test_IR_message\Test_IR_message.asm</FILE><LINE>100</LINE></WDT_off>
+  <main0><FILE>C:\FPC\Work_AVR\Test_IR_message\Test_IR_message.asm</FILE><LINE>126</LINE></main0>
+  <message_><FILE>C:\FPC\Work_AVR\Test_IR_message\Test_IR_message.asm</FILE><LINE>135</LINE></message_>
+  <DelayLong><FILE>C:\FPC\Work_AVR\Test_IR_message\Test_IR_message.asm</FILE><LINE>214</LINE></DelayLong>
+  <message_0><FILE>C:\FPC\Work_AVR\Test_IR_message\Test_IR_message.asm</FILE><LINE>145</LINE></message_0>
+  <WR_1><FILE>C:\FPC\Work_AVR\Test_IR_message\Test_IR_message.asm</FILE><LINE>156</LINE></WR_1>
+  <WR_0><FILE>C:\FPC\Work_AVR\Test_IR_message\Test_IR_message.asm</FILE><LINE>172</LINE></WR_0>
+  <delay><FILE>C:\FPC\Work_AVR\Test_IR_message\Test_IR_message.asm</FILE><LINE>193</LINE></delay>
+  <loop0><FILE>C:\FPC\Work_AVR\Test_IR_message\Test_IR_message.asm</FILE><LINE>200</LINE></loop0>
+  <loop1><FILE>C:\FPC\Work_AVR\Test_IR_message\Test_IR_message.asm</FILE><LINE>202</LINE></loop1>
+  <loopL2><FILE>C:\FPC\Work_AVR\Test_IR_message\Test_IR_message.asm</FILE><LINE>220</LINE></loopL2>
+  <loopL1><FILE>C:\FPC\Work_AVR\Test_IR_message\Test_IR_message.asm</FILE><LINE>222</LINE></loopL1>
+  <loopL0><FILE>C:\FPC\Work_AVR\Test_IR_message\Test_IR_message.asm</FILE><LINE>224</LINE></loopL0>
+ </LABELS>
+</ASSEMBLER_INFO>

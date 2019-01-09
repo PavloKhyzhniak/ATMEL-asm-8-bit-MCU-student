@@ -1,0 +1,27 @@
+<ASSEMBLER_INFO>
+ <VERSION>2.1.12</VERSION>
+ <DEVICE>ATmega8</DEVICE>
+ <WORKING_DIR>C:\FPC\Work_AVR\TestINT</WORKING_DIR>
+ <INCLUDE_PATH>
+  <DIR>C:\Program Files\Atmel\AVR Tools\AvrAssembler2\Appnotes</DIR>
+ </INCLUDE_PATH>
+ <SOURCE_FILE>C:\FPC\Work_AVR\TestINT\TestINT.asm</SOURCE_FILE>
+ <INCLUDED_FILES>
+  <FILE>C:\Program Files\Atmel\AVR Tools\AvrAssembler2\Appnotes\m8def.inc</FILE>
+ </INCLUDED_FILES>
+ <OBJECT_FILES>
+  <FILE>C:\FPC\Work_AVR\TestINT\TestINT.obj</FILE>
+ </OBJECT_FILES>
+ <HEX_FILES>
+  <FILE>C:\FPC\Work_AVR\TestINT\TestINT.hex</FILE>
+ </HEX_FILES>
+ <OUTPUT_FILES>
+  <FILE>C:\FPC\Work_AVR\TestINT\TestINT.map</FILE>
+ </OUTPUT_FILES>
+ <LABELS>
+  <Reset><FILE>C:\FPC\Work_AVR\TestINT\TestINT.asm</FILE><LINE>32</LINE></Reset>
+  <EXT_INT0><FILE>C:\FPC\Work_AVR\TestINT\TestINT.asm</FILE><LINE>21</LINE></EXT_INT0>
+  <TIM0_OVF><FILE>C:\FPC\Work_AVR\TestINT\TestINT.asm</FILE><LINE>9</LINE></TIM0_OVF>
+  <main><FILE>C:\FPC\Work_AVR\TestINT\TestINT.asm</FILE><LINE>56</LINE></main>
+ </LABELS>
+</ASSEMBLER_INFO>
