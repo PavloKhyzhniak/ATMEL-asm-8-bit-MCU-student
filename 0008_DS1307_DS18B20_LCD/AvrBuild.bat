@@ -1,0 +1,2 @@
+@ECHO OFF
+"C:\Program Files (x86)\Atmel\AVR Tools\AvrAssembler2\avrasm2.exe" -S "C:\Web_Pavel\DS1307_DS18B20_LCD\labels.tmp" -fI -W+ie -o "C:\Web_Pavel\DS1307_DS18B20_LCD\DS1307_DS18B20_LCD.hex" -d "C:\Web_Pavel\DS1307_DS18B20_LCD\DS1307_DS18B20_LCD.obj" -e "C:\Web_Pavel\DS1307_DS18B20_LCD\DS1307_DS18B20_LCD.eep" -m "C:\Web_Pavel\DS1307_DS18B20_LCD\DS1307_DS18B20_LCD.map" "C:\Web_Pavel\DS1307_DS18B20_LCD\DS1307_DS18B20_LCD.asm"
